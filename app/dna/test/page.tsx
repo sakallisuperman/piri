@@ -38,7 +38,15 @@ export default function DnaTestPage() {
   const questions = useMemo(() => getQuestionsForMode(mode), [mode]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<AnswerMap>({});
+  const [answers, setAnswers] = useState<AnswerMap>(() => {
+    if (typeof window === 'undefined') return {};
+    // Restore partial answers from layer 1 if returning from signup
+    const partial = localStorage.getItem(`piri_answers_${mode}_partial`);
+    if (partial) {
+      try { return JSON.parse(partial); } catch { return {}; }
+    }
+    return {};
+  });
   const [selected, setSelected] = useState<number | null>(null);
   const [textValue, setTextValue] = useState('');
   const [transition, setTransition] = useState<TransitionState>({
@@ -47,6 +55,26 @@ export default function DnaTestPage() {
     text: '',
   });
   const [animating, setAnimating] = useState(false);
+
+  // Check if returning from signup (start at layer 2)
+  const [startLayer] = useState<number>(() => {
+    if (typeof window === 'undefined') return 1;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('layer') === '2') {
+      // Find first layer 2 question index
+      const qs = getQuestionsForMode(mode);
+      const idx = qs.findIndex(q => q.layer === 2);
+      return idx >= 0 ? idx : 0;
+    }
+    return 0;
+  });
+
+  // Set initial index based on startLayer
+  const [initialSet, setInitialSet] = useState(false);
+  if (!initialSet && startLayer > 0 && currentIndex === 0) {
+    setCurrentIndex(startLayer);
+    setInitialSet(true);
+  }
 
   const question = questions[currentIndex];
 
@@ -61,6 +89,17 @@ export default function DnaTestPage() {
     }
 
     if (nextQuestion.layer !== currentLayer) {
+      // After Layer 1 → redirect to signup if not signed up
+      if (currentLayer === 1) {
+        const isSignedUp = typeof window !== 'undefined' && localStorage.getItem('piri_signed_up') === 'true';
+        if (!isSignedUp) {
+          // Save current answers before redirect
+          localStorage.setItem(`piri_answers_${mode}_partial`, JSON.stringify(nextAnswers));
+          router.push('/signup');
+          return;
+        }
+      }
+
       const text =
         nextQuestion.layer === 2
           ? 'Sinyallerin oluşuyor. Ama henüz yüzeyde kalıyoruz. Şimdi daha derine ineceğiz.'
