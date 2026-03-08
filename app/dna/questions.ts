@@ -41,6 +41,14 @@ export const CHOICE_6 = [
   'Tam ben',
 ];
 
+export const CHOICE_5 = [
+  'Kesinlikle katılmıyorum',
+  'Katılmıyorum',
+  'Kararsızım',
+  'Katılıyorum',
+  'Kesinlikle katılıyorum',
+];
+
 export const QUESTION_BANK: Question[] = [
   // =========================================
   // WORK — LAYER 1 (9)
@@ -844,7 +852,12 @@ export function getQuestionsForModeAndLayer(mode: Mode, layer: Layer) {
 }
 
 export function scoreChoiceIndex(index: number) {
-  // 0..5 => 0..3
+  // 0..4 => 0..4 (5-point scale, direct mapping)
+  return index;
+}
+
+export function scoreChoiceIndex6(index: number) {
+  // Legacy 6-point: 0..5 => 0..3
   if (index <= 1) return 0;
   if (index === 2) return 1;
   if (index === 3) return 2;

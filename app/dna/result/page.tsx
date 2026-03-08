@@ -134,7 +134,7 @@ export default function DnaResultPage() {
 
       const index = Number(answer);
       const base = scoreChoiceIndex(index);
-      const value = q.reverse ? 3 - base : base;
+      const value = q.reverse ? 4 - base : base;
 
       coreRaw[q.primary] += value;
       coreCount[q.primary] += 1;
@@ -146,10 +146,10 @@ export default function DnaResultPage() {
     });
 
     const normCore = (dim: CoreDimension) =>
-      coreCount[dim] ? Math.round((coreRaw[dim] / (coreCount[dim] * 3)) * 100) : 0;
+      coreCount[dim] ? Math.round((coreRaw[dim] / (coreCount[dim] * 4)) * 100) : 0;
 
     const normShadow = (sig: ShadowSignal) =>
-      shadowCount[sig] ? Math.round((shadowRaw[sig] / (shadowCount[sig] * 3)) * 100) : 0;
+      shadowCount[sig] ? Math.round((shadowRaw[sig] / (shadowCount[sig] * 4)) * 100) : 0;
 
     setScores({
       risk: normCore('risk'),

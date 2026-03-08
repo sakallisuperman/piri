@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Mode = 'work' | 'life' | 'love';
-type Phase = 'dark' | 'wake' | 'fade' | 'light' | 'sub';
+type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
+type Gender = 'female' | 'male' | 'other';
+type AgeRange = '18-22' | '23-27' | '28-32' | '33+';
 
 type Bubble = {
   id: number; x: number; size: number; delay: number;
@@ -82,13 +84,15 @@ export default function Home() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('dark');
   const [mode, setMode] = useState<Mode | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [ageRange, setAgeRange] = useState<AgeRange | null>(null);
+  const [profileStep, setProfileStep] = useState<'gender' | 'age' | 'done'>('gender');
   const [showDoors, setShowDoors] = useState(false);
   const [showDoorPrompt, setShowDoorPrompt] = useState(false);
   const [showSubs, setShowSubs] = useState(false);
   const [subText, setSubText] = useState<string[]>([]);
   const [subCurrent, setSubCurrent] = useState('');
   const [orbVisible, setOrbVisible] = useState(false);
-  // Cloud dissolve progress 0 → 1
   const [fadeProgress, setFadeProgress] = useState(0);
 
   const [bubbles] = useState<Bubble[]>(() =>
@@ -135,15 +139,12 @@ export default function Home() {
     }, 600);
 
     const t2 = setTimeout(() => {
-      setPhase('light');
+      setPhase('profile');
       setOrbVisible(true);
     }, 4400);
 
-    const t3 = setTimeout(() => setShowDoorPrompt(true), 5200);
-    const t4 = setTimeout(() => setShowDoors(true), 5800);
-
     return () => {
-      [t0, t1, t2, t3, t4].forEach(clearTimeout);
+      [t0, t1, t2].forEach(clearTimeout);
       if (raf) cancelAnimationFrame(raf);
     };
   }, [wake.done]);
@@ -168,6 +169,24 @@ export default function Home() {
     setTimeout(() => { if (!cancelled) setShowSubs(true); }, t + 200);
     return () => { cancelled = true; };
   }, [phase, mode]);
+
+  function selectGender(g: Gender) {
+    setGender(g);
+    localStorage.setItem('piri_gender', g);
+    setProfileStep('age');
+  }
+
+  function selectAge(a: AgeRange) {
+    setAgeRange(a);
+    localStorage.setItem('piri_age', a);
+    setProfileStep('done');
+    // Transition to doors
+    setTimeout(() => {
+      setPhase('light');
+      setShowDoorPrompt(true);
+    }, 300);
+    setTimeout(() => setShowDoors(true), 800);
+  }
 
   function selectDoor(m: Mode) {
     setMode(m);
@@ -199,7 +218,8 @@ export default function Home() {
 
   const isDark = phase === 'dark' || phase === 'wake';
   const isFade = phase === 'fade';
-  const isLight = phase === 'light' || phase === 'sub';
+  const isProfile = phase === 'profile';
+  const isLight = phase === 'light' || phase === 'sub' || isProfile;
   const modeLabels: Record<Mode, string> = { work: 'İş', life: 'Yol', love: 'Aşk' };
   const modeIcons: Record<Mode, string> = { work: '⬡', life: '◇', love: '○' };
 
@@ -320,6 +340,29 @@ export default function Home() {
                 <div className="orb-pulse-ring" />
               </div>
             </div>
+
+            {/* Profile: Gender + Age */}
+            {isProfile && profileStep === 'gender' && (
+              <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
+                <p className="text-lg text-slate-700">Seni tanımam lazım.</p>
+                <div className="flex items-center justify-center gap-4">
+                  <button onClick={() => selectGender('female')} className="profile-btn">Kadın</button>
+                  <button onClick={() => selectGender('male')} className="profile-btn">Erkek</button>
+                  <button onClick={() => selectGender('other')} className="profile-btn profile-btn-small">Belirtmek istemiyorum</button>
+                </div>
+              </div>
+            )}
+
+            {isProfile && profileStep === 'age' && (
+              <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
+                <p className="text-lg text-slate-700">Yaş aralığın?</p>
+                <div className="flex items-center justify-center gap-3">
+                  {(['18-22', '23-27', '28-32', '33+'] as AgeRange[]).map((a) => (
+                    <button key={a} onClick={() => selectAge(a)} className="profile-btn">{a}</button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {showDoorPrompt && (
               <p className="text-lg text-slate-700 mb-8 animate-fadeUp text-center">{DOOR_PROMPT}</p>
@@ -452,6 +495,17 @@ export default function Home() {
         .sub-btn:active { transform: scale(0.98); }
         .back-btn { padding: 8px 16px; border-radius: 999px; background: transparent; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.2s; }
         .back-btn:hover { color: #475569; }
+
+        .profile-btn {
+          padding: 14px 24px; border-radius: 18px;
+          background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8);
+          box-shadow: 0 4px 14px rgba(15,23,42,0.05); backdrop-filter: blur(12px);
+          font-size: 16px; font-weight: 500; color: #334155; cursor: pointer;
+          transition: transform 0.12s ease, background 0.2s ease;
+        }
+        .profile-btn:hover { background: rgba(255,255,255,0.85); transform: scale(1.03); }
+        .profile-btn:active { transform: scale(0.97); }
+        .profile-btn-small { font-size: 13px; padding: 14px 16px; }
 
         .animate-fadeUp { animation: fadeUp 0.5s ease both; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
