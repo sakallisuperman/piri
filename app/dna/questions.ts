@@ -123,7 +123,6 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Belirsizlik olsa da yolda netleşebileceğine inanırım.',
     primary: 'uncertainty',
-    secondary: ['risk'],
     reverse: true,
     options: CHOICE_6,
   },
@@ -134,7 +133,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Kariyerimde yön değiştirmek beni diri tutar.',
     primary: 'risk',
-    secondary: ['energy'],
+    
     options: CHOICE_6,
   },
 
@@ -228,7 +227,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Yeni bir başlangıç, içimde hem heyecan hem alarm yaratır.',
     primary: 'risk',
-    secondary: ['uncertainty'],
+    
     options: CHOICE_6,
   },
 
@@ -318,7 +317,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Büyük bir hayat değişimi fikri beni canlı tutar.',
     primary: 'risk',
-    secondary: ['energy'],
+    
     options: CHOICE_6,
   },
   {
@@ -471,7 +470,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Büyük değişim düşüncesi bende hem umut hem yorgunluk yaratır.',
     primary: 'energy',
-    secondary: ['uncertainty'],
+    
     options: CHOICE_6,
   },
   {
@@ -491,7 +490,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Hayatımı yeniden yönlendirmek içten içe bana çekici gelir.',
     primary: 'risk',
-    secondary: ['energy'],
+    
     options: CHOICE_6,
   },
 
@@ -755,7 +754,7 @@ export const QUESTION_BANK: Question[] = [
     inputType: 'choice',
     text: 'Kalmak da gitmek de bazen aynı anda beni korkutur.',
     primary: 'risk',
-    secondary: ['uncertainty'],
+    
     options: CHOICE_6,
   },
 
