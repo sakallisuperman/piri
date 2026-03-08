@@ -6,7 +6,7 @@ import PiriOrb from './components/PiriOrb';
 
 type Mode = 'work' | 'life' | 'love';
 type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
-type Gender = 'female' | 'male' | 'other';
+type Gender = 'female' | 'male';
 type AgeRange = '18-22' | '23-27' | '28-32' | '33+';
 
 type Bubble = {
@@ -338,20 +338,19 @@ export default function Home() {
             {/* Profile: Piri speaks + Gender + Age */}
             {isProfile && profileStep === 'gender' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
-                <p className="text-[13px] tracking-widest text-slate-400 uppercase">Piri</p>
+                <p className="piri-label">Piri</p>
                 <p className="text-xl text-slate-900">Seni tanımam lazım.</p>
                 <p className="text-slate-500 text-sm">Sadece iki soru.</p>
-                <div className="flex items-center justify-center gap-4 pt-2">
-                  <button onClick={() => selectGender('female')} className="profile-btn">Kadın</button>
-                  <button onClick={() => selectGender('male')} className="profile-btn">Erkek</button>
-                  <button onClick={() => selectGender('other')} className="profile-btn profile-btn-small">Belirtmek istemiyorum</button>
+                <div className="flex items-center justify-center gap-5 pt-2">
+                  <button onClick={() => selectGender('female')} className="gender-btn gender-female">Kadın</button>
+                  <button onClick={() => selectGender('male')} className="gender-btn gender-male">Erkek</button>
                 </div>
               </div>
             )}
 
             {isProfile && profileStep === 'age' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
-                <p className="text-[13px] tracking-widest text-slate-400 uppercase">Piri</p>
+                <p className="piri-label">Piri</p>
                 <p className="text-xl text-slate-900">Yaş aralığın?</p>
                 <div className="flex items-center justify-center gap-3 pt-2">
                   {(['18-22', '23-27', '28-32', '33+'] as AgeRange[]).map((a) => (
@@ -458,6 +457,34 @@ export default function Home() {
         .back-btn { padding: 8px 16px; border-radius: 999px; background: transparent; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.2s; }
         .back-btn:hover { color: #475569; }
 
+        /* Piri label — bold, visible */
+        .piri-label {
+          font-size: 15px; font-weight: 700; letter-spacing: 0.15em;
+          text-transform: uppercase;
+          background: linear-gradient(135deg, #6b8cff, #a78bfa, #7dd3fc);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        /* Gender buttons — gradient backgrounds */
+        .gender-btn {
+          padding: 18px 36px; border-radius: 20px;
+          font-size: 17px; font-weight: 600; cursor: pointer;
+          border: none; color: white; min-width: 130px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+          transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+        .gender-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+        .gender-btn:active { transform: scale(0.97); }
+
+        .gender-female {
+          background: linear-gradient(135deg, #c084fc, #a855f7, #9333ea);
+        }
+        .gender-male {
+          background: linear-gradient(135deg, #7dd3fc, #38bdf8, #0ea5e9);
+        }
+
+        /* Age/profile buttons */
         .profile-btn {
           padding: 14px 24px; border-radius: 18px;
           background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8);
@@ -467,7 +494,6 @@ export default function Home() {
         }
         .profile-btn:hover { background: rgba(255,255,255,0.85); transform: scale(1.03); }
         .profile-btn:active { transform: scale(0.97); }
-        .profile-btn-small { font-size: 13px; padding: 14px 16px; }
 
         .animate-fadeUp { animation: fadeUp 0.5s ease both; }
         @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
