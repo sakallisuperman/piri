@@ -102,14 +102,11 @@ export default function DnaTestPage() {
     );
   }
 
-  const progress = Math.round(((currentIndex + 1) / questions.length) * 100);
-
-  const layerTitle =
-    question.layer === 1
-      ? 'Katman 1'
-      : question.layer === 2
-      ? 'Katman 2'
-      : 'Katman 3';
+  // Layer-based progress: show as "1.3" meaning layer 1, question 3
+  const layerQuestions = questions.filter((q) => q.layer === question.layer);
+  const indexInLayer = layerQuestions.indexOf(question) + 1;
+  const layerLabel = `${question.layer}.${indexInLayer}`;
+  const layerProgress = Math.round((indexInLayer / layerQuestions.length) * 100);
 
   if (transition.visible) {
     return (
@@ -140,18 +137,33 @@ export default function DnaTestPage() {
       <div className="relative w-full max-w-2xl space-y-8">
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm text-slate-600">
-            <span>
-              {layerTitle} · {currentIndex + 1} / {questions.length}
+            <span className="font-medium">
+              Bölüm {question.layer} · Soru {layerLabel}
             </span>
-            <span>
+            <span className="text-slate-400">
               {question.inputType === 'text'
                 ? 'Kısa yaz. Net yaz.'
-                : 'İlk tepkin daha doğru cevaptır.'}
+                : 'İlk tepkin daha doğru.'}
             </span>
           </div>
 
-          <div className="h-2 w-full rounded-full bg-slate-900/10 overflow-hidden">
-            <div className="h-full bg-slate-900" style={{ width: `${progress}%` }} />
+          {/* Layer dots */}
+          <div className="flex items-center gap-2">
+            {[1, 2, 3].map((l) => (
+              <div key={l} className="flex-1 h-1.5 rounded-full overflow-hidden bg-slate-900/10">
+                <div
+                  className="h-full bg-slate-900 transition-all duration-300"
+                  style={{
+                    width:
+                      l < question.layer
+                        ? '100%'
+                        : l === question.layer
+                        ? `${layerProgress}%`
+                        : '0%',
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
