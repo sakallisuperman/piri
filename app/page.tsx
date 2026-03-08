@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PiriOrb from './components/PiriOrb';
 
 type Mode = 'work' | 'life' | 'love';
 type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
@@ -324,28 +325,23 @@ export default function Home() {
         {isLight && (
           <>
             <div
-              className="relative mb-10"
+              className="relative mb-8"
               style={{
                 opacity: orbVisible ? 1 : 0,
-                transform: orbVisible ? 'scale(1)' : 'scale(0.8)',
-                transition: 'opacity 1.2s ease, transform 1.2s ease',
+                transform: orbVisible ? 'scale(1)' : 'scale(0.6)',
+                transition: 'opacity 1.5s ease, transform 1.5s ease',
               }}
             >
-              <div className="absolute inset-[-36px] rounded-full bg-[rgba(170,210,255,0.4)] blur-[24px]" />
-              <div className="piri-orb">
-                <div className="orb-core" />
-                <div className="orb-shine" />
-                <div className="orb-ring r1" />
-                <div className="orb-ring r2" />
-                <div className="orb-pulse-ring" />
-              </div>
+              <PiriOrb size={140} />
             </div>
 
-            {/* Profile: Gender + Age */}
+            {/* Profile: Piri speaks + Gender + Age */}
             {isProfile && profileStep === 'gender' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
-                <p className="text-lg text-slate-700">Seni tanımam lazım.</p>
-                <div className="flex items-center justify-center gap-4">
+                <p className="text-[13px] tracking-widest text-slate-400 uppercase">Piri</p>
+                <p className="text-xl text-slate-900">Seni tanımam lazım.</p>
+                <p className="text-slate-500 text-sm">Sadece iki soru.</p>
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <button onClick={() => selectGender('female')} className="profile-btn">Kadın</button>
                   <button onClick={() => selectGender('male')} className="profile-btn">Erkek</button>
                   <button onClick={() => selectGender('other')} className="profile-btn profile-btn-small">Belirtmek istemiyorum</button>
@@ -355,8 +351,9 @@ export default function Home() {
 
             {isProfile && profileStep === 'age' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
-                <p className="text-lg text-slate-700">Yaş aralığın?</p>
-                <div className="flex items-center justify-center gap-3">
+                <p className="text-[13px] tracking-widest text-slate-400 uppercase">Piri</p>
+                <p className="text-xl text-slate-900">Yaş aralığın?</p>
+                <div className="flex items-center justify-center gap-3 pt-2">
                   {(['18-22', '23-27', '28-32', '33+'] as AgeRange[]).map((a) => (
                     <button key={a} onClick={() => selectAge(a)} className="profile-btn">{a}</button>
                   ))}
@@ -431,41 +428,6 @@ export default function Home() {
           85% { opacity: 0.3; }
           100% { transform: translateY(-85vh) translateX(calc(var(--drift)*-0.5)) scale(1.1); opacity: 0; }
         }
-
-        .piri-orb {
-          position: relative; width: 150px; height: 150px; border-radius: 999px;
-          background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.98), rgba(210,230,255,0.9) 30%, rgba(165,200,255,0.8) 58%, rgba(135,180,255,0.4) 80%, rgba(120,165,255,0.15) 100%);
-          border: 1px solid rgba(255,255,255,0.85);
-          box-shadow: 0 20px 60px rgba(90,140,255,0.18), 0 0 0 10px rgba(255,255,255,0.12), inset 0 0 28px rgba(255,255,255,0.5);
-          overflow: visible;
-          animation: orbFloat 6s ease-in-out infinite, orbBreathe 4s ease-in-out infinite;
-        }
-        @keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes orbBreathe {
-          0%,100% { box-shadow: 0 20px 60px rgba(90,140,255,0.18), 0 0 0 10px rgba(255,255,255,0.12), inset 0 0 28px rgba(255,255,255,0.5); }
-          50% { box-shadow: 0 24px 80px rgba(90,140,255,0.28), 0 0 0 14px rgba(200,220,255,0.18), inset 0 0 36px rgba(255,255,255,0.6); }
-        }
-        .orb-core {
-          position: absolute; inset: 20%; border-radius: 999px;
-          background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(230,242,255,0.7) 50%, rgba(185,215,255,0.2) 100%);
-          animation: orbPulse 3s ease-in-out infinite; filter: blur(1px);
-        }
-        @keyframes orbPulse { 0%,100%{transform:scale(0.95);opacity:0.8} 50%{transform:scale(1.08);opacity:1} }
-        .orb-shine {
-          position: absolute; width: 42%; height: 42%; top: 12%; left: 14%; border-radius: 999px;
-          background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0.15) 60%, transparent 100%);
-          filter: blur(5px); animation: shineShift 8s ease-in-out infinite;
-        }
-        @keyframes shineShift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(3px,2px) scale(1.05)} 66%{transform:translate(-2px,-1px) scale(0.97)} }
-        .orb-ring { position: absolute; inset: 8%; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); animation: orbSpin 18s linear infinite; }
-        .orb-ring.r2 { inset: 14%; animation-duration: 24s; animation-direction: reverse; border-color: rgba(200,220,255,0.15); }
-        @keyframes orbSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-        .orb-pulse-ring {
-          position: absolute; inset: -8px; border-radius: 999px;
-          border: 1px solid rgba(180,210,255,0.25);
-          animation: pulseRing 3s ease-out infinite;
-        }
-        @keyframes pulseRing { 0%{transform:scale(0.95);opacity:0.6} 70%{transform:scale(1.12);opacity:0} 100%{transform:scale(1.12);opacity:0} }
 
         .typing-cursor { animation: termBlink 0.5s step-end infinite; color: #94a3b8; font-weight: 300; margin-left: 1px; }
 
