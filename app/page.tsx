@@ -459,7 +459,7 @@ export default function Home() {
 
         /* Piri label — bold, visible */
         .piri-label {
-          font-size: 15px; font-weight: 700; letter-spacing: 0.15em;
+          font-size: 22px; font-weight: 300; letter-spacing: 0.25em;
           text-transform: uppercase;
           background: linear-gradient(135deg, #6b8cff, #a78bfa, #7dd3fc);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -478,10 +478,12 @@ export default function Home() {
         .gender-btn:active { transform: scale(0.97); }
 
         .gender-female {
-          background: linear-gradient(135deg, #c084fc, #a855f7, #9333ea);
+          background: linear-gradient(135deg, rgba(192,132,252,0.45), rgba(168,85,247,0.4), rgba(147,51,234,0.35));
+          color: #7e22ce;
         }
         .gender-male {
-          background: linear-gradient(135deg, #7dd3fc, #38bdf8, #0ea5e9);
+          background: linear-gradient(135deg, rgba(125,211,252,0.4), rgba(56,189,248,0.35), rgba(14,165,233,0.3));
+          color: #0369a1;
         }
 
         /* Age/profile buttons */
