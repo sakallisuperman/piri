@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Mode = 'work' | 'life' | 'love';
-type Phase = 'dark' | 'wake' | 'bloom' | 'ready' | 'sub';
+type Phase = 'dark' | 'wake' | 'fade' | 'light' | 'sub';
 
 type Bubble = {
   id: number; x: number; size: number; delay: number;
@@ -47,7 +47,6 @@ const SUBS: Record<Mode, { label: string; value: string }[]> = {
   ],
 };
 
-// Terminal typing
 function useTerminal(lines: { text: string; pause: number }[], active: boolean) {
   const [displayed, setDisplayed] = useState<string[]>([]);
   const [current, setCurrent] = useState('');
@@ -88,9 +87,9 @@ export default function Home() {
   const [showSubs, setShowSubs] = useState(false);
   const [subText, setSubText] = useState<string[]>([]);
   const [subCurrent, setSubCurrent] = useState('');
-
-  // Orb scale for bloom animation (0 → 1 → settles)
-  const [orbScale, setOrbScale] = useState(0);
+  const [orbVisible, setOrbVisible] = useState(false);
+  // Cloud dissolve progress 0 → 1
+  const [fadeProgress, setFadeProgress] = useState(0);
 
   const [bubbles] = useState<Bubble[]>(() =>
     Array.from({ length: 28 }).map((_, i) => ({
@@ -103,36 +102,53 @@ export default function Home() {
 
   const wake = useTerminal(WAKE_LINES, phase === 'wake');
 
-  // Dark → wake
   useEffect(() => {
     const t = setTimeout(() => setPhase('wake'), 800);
     return () => clearTimeout(t);
   }, []);
 
-  // After wake → bloom: orb grows from center, pushing dark away
+  // After wake → slow cloud dissolve
   useEffect(() => {
     if (!wake.done) return;
 
+    const t0 = setTimeout(() => setPhase('fade'), 500);
+
+    // Animate fadeProgress from 0 to 1 over ~3.5 seconds using requestAnimationFrame
+    let start: number | null = null;
+    let raf: number;
+    const duration = 3500;
+
+    const animate = (ts: number) => {
+      if (!start) start = ts;
+      const elapsed = ts - start;
+      const p = Math.min(1, elapsed / duration);
+      // Ease-in-out cubic
+      const eased = p < 0.5
+        ? 4 * p * p * p
+        : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      setFadeProgress(eased);
+      if (p < 1) raf = requestAnimationFrame(animate);
+    };
+
     const t1 = setTimeout(() => {
-      setPhase('bloom');
-      // Animate orb scale over time
-      setOrbScale(0.05);
-    }, 500);
+      raf = requestAnimationFrame(animate);
+    }, 600);
 
-    const t2 = setTimeout(() => setOrbScale(0.15), 800);
-    const t3 = setTimeout(() => setOrbScale(0.4), 1200);
-    const t4 = setTimeout(() => setOrbScale(0.7), 1600);
-    const t5 = setTimeout(() => setOrbScale(1), 2000);
-    const t6 = setTimeout(() => {
-      setPhase('ready');
-      setShowDoorPrompt(true);
-    }, 2800);
-    const t7 = setTimeout(() => setShowDoors(true), 3400);
+    const t2 = setTimeout(() => {
+      setPhase('light');
+      setOrbVisible(true);
+    }, 4400);
 
-    return () => { [t1,t2,t3,t4,t5,t6,t7].forEach(clearTimeout); };
+    const t3 = setTimeout(() => setShowDoorPrompt(true), 5200);
+    const t4 = setTimeout(() => setShowDoors(true), 5800);
+
+    return () => {
+      [t0, t1, t2, t3, t4].forEach(clearTimeout);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [wake.done]);
 
-  // Sub-category typing
+  // Sub typing
   useEffect(() => {
     if (phase !== 'sub' || !mode) return;
     const lines = DOOR_LINES[mode];
@@ -173,7 +189,7 @@ export default function Home() {
 
   function goBack() {
     setMode(null);
-    setPhase('ready');
+    setPhase('light');
     setShowDoors(true);
     setShowDoorPrompt(true);
     setShowSubs(false);
@@ -182,33 +198,59 @@ export default function Home() {
   }
 
   const isDark = phase === 'dark' || phase === 'wake';
-  const isBloom = phase === 'bloom';
-  const isLight = phase === 'ready' || phase === 'sub';
+  const isFade = phase === 'fade';
+  const isLight = phase === 'light' || phase === 'sub';
   const modeLabels: Record<Mode, string> = { work: 'İş', life: 'Yol', love: 'Aşk' };
   const modeIcons: Record<Mode, string> = { work: '⬡', life: '◇', love: '○' };
 
-  // Radial gradient mask: orb "opens" the light from center
-  const bloomRadius = orbScale * 120; // vw units
-  const bgStyle = isDark
-    ? 'radial-gradient(circle at 50% 45%, #0a0d14 100%, #0a0d14 100%)'
-    : isBloom
-    ? `radial-gradient(circle at 50% 45%, #edf6ff ${bloomRadius}vw, #0a0d14 ${bloomRadius + 8}vw)`
-    : 'radial-gradient(circle at 50% 45%, #f5faff 0%, #edf6ff 40%, #f5fbff 100%)';
-
   return (
     <main className="min-h-screen w-full overflow-hidden relative select-none">
-      {/* Background with radial bloom */}
+      {/* Light background (always present, behind dark overlay) */}
+      <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+
+      {/* Dark overlay with cloud dissolve via SVG turbulence mask */}
       <div
-        className="fixed inset-0"
+        className="fixed inset-0 z-[1] pointer-events-none"
         style={{
-          background: bgStyle,
-          transition: isBloom ? 'none' : 'background 1.5s ease',
+          opacity: isLight ? 0 : 1,
+          transition: isLight ? 'opacity 0.8s ease' : 'none',
         }}
-      />
+      >
+        {/* SVG filter for cloud/smoke dissolve */}
+        <svg className="absolute w-0 h-0">
+          <defs>
+            <filter id="cloud-dissolve">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.015"
+                numOctaves="4"
+                seed="3"
+                result="noise"
+              />
+              <feComponentTransfer in="noise" result="threshold">
+                <feFuncA type="discrete" tableValues={
+                  isFade
+                    ? `${1 - fadeProgress} ${fadeProgress < 0.7 ? 1 : 0}`
+                    : isDark ? '1 1' : '0 0'
+                } />
+              </feComponentTransfer>
+              <feComposite in="SourceGraphic" in2="threshold" operator="in" />
+            </filter>
+          </defs>
+        </svg>
+
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, #0a0d14, #050709)',
+            filter: isFade ? 'url(#cloud-dissolve)' : 'none',
+          }}
+        />
+      </div>
 
       {/* Ambient glow */}
       <div
-        className="pointer-events-none fixed inset-0 transition-opacity duration-[2000ms]"
+        className="pointer-events-none fixed inset-0 z-[2] transition-opacity duration-[1500ms]"
         style={{ opacity: isLight ? 1 : 0 }}
       >
         <div className="absolute w-[360px] h-[360px] rounded-full left-[12%] bottom-[6%] bg-[#deeeff] opacity-50 blur-[70px]" />
@@ -217,7 +259,7 @@ export default function Home() {
 
       {/* Bubbles */}
       <div
-        className="pointer-events-none fixed inset-0 overflow-hidden transition-opacity duration-[2000ms]"
+        className="pointer-events-none fixed inset-0 z-[2] overflow-hidden transition-opacity duration-[2000ms]"
         style={{ opacity: isLight ? 1 : 0 }}
       >
         <div className="absolute left-1/2 -translate-x-1/2 bottom-[-100px] w-[420px] h-[220px] rounded-full bg-[rgba(160,200,255,0.35)] blur-[30px]" />
@@ -235,12 +277,18 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Main */}
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5">
+      {/* Content */}
+      <div className="relative z-[10] flex min-h-screen flex-col items-center justify-center px-5">
 
         {/* Dark: terminal */}
-        {isDark && (
-          <div className="w-full max-w-[500px] text-center space-y-4 min-h-[180px] flex flex-col items-center justify-center">
+        {(isDark || isFade) && (
+          <div
+            className="w-full max-w-[500px] text-center space-y-4 min-h-[180px] flex flex-col items-center justify-center"
+            style={{
+              opacity: isFade ? Math.max(0, 1 - fadeProgress * 1.5) : 1,
+              transition: 'opacity 0.5s ease',
+            }}
+          >
             {wake.displayed.map((line, i) => (
               <p key={i} className="terminal-line">{line}</p>
             ))}
@@ -252,15 +300,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* Bloom + Light: Orb */}
-        {(isBloom || isLight) && (
+        {/* Light: Orb + content */}
+        {isLight && (
           <>
             <div
               className="relative mb-10"
               style={{
-                transform: `scale(${isLight ? 1 : orbScale})`,
-                opacity: isBloom ? Math.min(1, orbScale * 2) : 1,
-                transition: isBloom ? 'transform 0.3s ease-out, opacity 0.3s ease' : 'transform 0.5s ease',
+                opacity: orbVisible ? 1 : 0,
+                transform: orbVisible ? 'scale(1)' : 'scale(0.8)',
+                transition: 'opacity 1.2s ease, transform 1.2s ease',
               }}
             >
               <div className="absolute inset-[-36px] rounded-full bg-[rgba(170,210,255,0.4)] blur-[24px]" />
@@ -269,17 +317,14 @@ export default function Home() {
                 <div className="orb-shine" />
                 <div className="orb-ring r1" />
                 <div className="orb-ring r2" />
-                {/* Inner glow pulse */}
                 <div className="orb-pulse-ring" />
               </div>
             </div>
 
-            {/* Door prompt */}
             {showDoorPrompt && (
               <p className="text-lg text-slate-700 mb-8 animate-fadeUp text-center">{DOOR_PROMPT}</p>
             )}
 
-            {/* Sub text */}
             {phase === 'sub' && (
               <div className="w-full max-w-[500px] text-center space-y-2 mb-8">
                 {subText.map((line, i) => (
@@ -293,8 +338,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* Doors */}
-            {showDoors && phase === 'ready' && (
+            {showDoors && phase === 'light' && (
               <div className="flex items-center justify-center gap-5 animate-fadeUp">
                 {(['work', 'life', 'love'] as Mode[]).map((m) => (
                   <button key={m} onClick={() => selectDoor(m)} className="door-btn">
@@ -305,7 +349,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Subs */}
             {showSubs && phase === 'sub' && mode && (
               <div className="w-full max-w-[440px] space-y-3 animate-fadeUp">
                 {SUBS[mode].map((sub) => (
@@ -346,58 +389,40 @@ export default function Home() {
           100% { transform: translateY(-85vh) translateX(calc(var(--drift)*-0.5)) scale(1.1); opacity: 0; }
         }
 
-        /* Orb — alive, breathing */
         .piri-orb {
           position: relative; width: 150px; height: 150px; border-radius: 999px;
           background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.98), rgba(210,230,255,0.9) 30%, rgba(165,200,255,0.8) 58%, rgba(135,180,255,0.4) 80%, rgba(120,165,255,0.15) 100%);
           border: 1px solid rgba(255,255,255,0.85);
           box-shadow: 0 20px 60px rgba(90,140,255,0.18), 0 0 0 10px rgba(255,255,255,0.12), inset 0 0 28px rgba(255,255,255,0.5);
-          overflow: hidden;
+          overflow: visible;
           animation: orbFloat 6s ease-in-out infinite, orbBreathe 4s ease-in-out infinite;
         }
-        @keyframes orbFloat {
-          0%,100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
+        @keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         @keyframes orbBreathe {
           0%,100% { box-shadow: 0 20px 60px rgba(90,140,255,0.18), 0 0 0 10px rgba(255,255,255,0.12), inset 0 0 28px rgba(255,255,255,0.5); }
           50% { box-shadow: 0 24px 80px rgba(90,140,255,0.28), 0 0 0 14px rgba(200,220,255,0.18), inset 0 0 36px rgba(255,255,255,0.6); }
         }
-
         .orb-core {
           position: absolute; inset: 20%; border-radius: 999px;
           background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(230,242,255,0.7) 50%, rgba(185,215,255,0.2) 100%);
           animation: orbPulse 3s ease-in-out infinite; filter: blur(1px);
         }
         @keyframes orbPulse { 0%,100%{transform:scale(0.95);opacity:0.8} 50%{transform:scale(1.08);opacity:1} }
-
         .orb-shine {
           position: absolute; width: 42%; height: 42%; top: 12%; left: 14%; border-radius: 999px;
           background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,255,255,0.15) 60%, transparent 100%);
-          filter: blur(5px);
-          animation: shineShift 8s ease-in-out infinite;
+          filter: blur(5px); animation: shineShift 8s ease-in-out infinite;
         }
-        @keyframes shineShift {
-          0%,100% { transform: translate(0,0) scale(1); }
-          33% { transform: translate(3px, 2px) scale(1.05); }
-          66% { transform: translate(-2px, -1px) scale(0.97); }
-        }
-
+        @keyframes shineShift { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(3px,2px) scale(1.05)} 66%{transform:translate(-2px,-1px) scale(0.97)} }
         .orb-ring { position: absolute; inset: 8%; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); animation: orbSpin 18s linear infinite; }
         .orb-ring.r2 { inset: 14%; animation-duration: 24s; animation-direction: reverse; border-color: rgba(200,220,255,0.15); }
         @keyframes orbSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-
-        /* Extra pulse ring that radiates outward */
         .orb-pulse-ring {
           position: absolute; inset: -8px; border-radius: 999px;
           border: 1px solid rgba(180,210,255,0.25);
           animation: pulseRing 3s ease-out infinite;
         }
-        @keyframes pulseRing {
-          0% { transform: scale(0.95); opacity: 0.6; }
-          70% { transform: scale(1.12); opacity: 0; }
-          100% { transform: scale(1.12); opacity: 0; }
-        }
+        @keyframes pulseRing { 0%{transform:scale(0.95);opacity:0.6} 70%{transform:scale(1.12);opacity:0} 100%{transform:scale(1.12);opacity:0} }
 
         .typing-cursor { animation: termBlink 0.5s step-end infinite; color: #94a3b8; font-weight: 300; margin-left: 1px; }
 
