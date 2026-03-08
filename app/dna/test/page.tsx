@@ -50,8 +50,8 @@ export default function DnaTestPage() {
     if (nextQuestion.layer !== currentLayer) {
       const text =
         nextQuestion.layer === 2
-          ? 'Bazı sinyaller oluşmaya başladı. Ama henüz yeterli değil.'
-          : 'Şimdi seni daha net görüyorum. Ama son parçaya ihtiyacım var.';
+          ? 'Sinyallerin oluşuyor. Ama henüz yüzeyde kalıyoruz. Şimdi daha derine ineceğiz.'
+          : 'Seni görmeye başladım. Ama son katman senin sesin olacak. Hazır mısın?';
 
       setAnswers(nextAnswers);
       setSelected(null);
@@ -111,21 +111,51 @@ export default function DnaTestPage() {
   if (transition.visible) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="fixed inset-0 bg-gradient-to-b from-[#EAF6FF] via-[#E6F4F1] to-[#F2F8FF]" />
+        <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
 
-        <div className="relative w-full max-w-2xl text-center">
-          <div className="bg-white/55 border border-white/60 rounded-[28px] p-10 shadow-sm ring-1 ring-white/60 backdrop-blur-xl space-y-6">
-            <div className="text-2xl font-semibold text-slate-900">Ben Piri.</div>
-            <p className="text-slate-700 text-lg leading-relaxed">{transition.text}</p>
-
-            <button
-              onClick={continueLayer}
-              className="px-6 py-3 rounded-xl bg-slate-900 text-white font-medium transition hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Devam et
-            </button>
+        <div className="relative w-full max-w-lg text-center space-y-8">
+          {/* Mini Piri orb */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-radial from-white via-[rgba(210,230,255,0.9)] to-[rgba(165,200,255,0.4)] border border-white/80 shadow-[0_12px_40px_rgba(90,140,255,0.15)] animate-[orbPulseSmall_3s_ease-in-out_infinite]" />
           </div>
+
+          {/* Piri speech */}
+          <div className="space-y-3">
+            <p className="text-[13px] tracking-widest text-slate-400 uppercase">Piri</p>
+            <p className="text-xl text-slate-900 leading-relaxed px-4">
+              {transition.text}
+            </p>
+          </div>
+
+          {/* Layer indicator */}
+          <div className="flex items-center justify-center gap-2">
+            {[1, 2, 3].map((l) => (
+              <div
+                key={l}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  l <= (transition.nextLayer ?? 1)
+                    ? 'bg-slate-900 scale-110'
+                    : 'bg-slate-300'
+                }`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={continueLayer}
+            className="px-8 py-3.5 rounded-2xl bg-slate-900 text-white font-medium transition hover:scale-[1.02] active:scale-[0.97]"
+          >
+            Devam et
+          </button>
         </div>
+
+        <style jsx>{`
+          @keyframes orbPulseSmall {
+            0%, 100% { transform: scale(0.95); opacity: 0.85; }
+            50% { transform: scale(1.05); opacity: 1; }
+          }
+          .bg-gradient-radial { background: radial-gradient(circle, var(--tw-gradient-stops)); }
+        `}</style>
       </main>
     );
   }

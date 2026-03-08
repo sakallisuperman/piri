@@ -71,7 +71,7 @@ function useSubtitles(lines: string[], active: boolean) {
 
     lines.forEach((line, li) => {
       const chars = line.split('');
-      const charSpeed = 25; // faster typing
+      const charSpeed = 29; // slightly faster than original
 
       chars.forEach((_, ci) => {
         const t = totalDelay + ci * charSpeed;
@@ -172,6 +172,7 @@ export default function Home() {
   }
 
   const modeLabels: Record<Mode, string> = { work: 'İş', life: 'Yol', love: 'Aşk' };
+  const modeIcons: Record<Mode, string> = { work: '⬡', life: '◇', love: '○' };
 
   return (
     <main className="min-h-screen w-full overflow-hidden relative select-none">
@@ -254,6 +255,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-5 animate-fadeUp">
             {(['work', 'life', 'love'] as Mode[]).map((m) => (
               <button key={m} onClick={() => selectDoor(m)} className="door-btn">
+                <span className="door-icon">{modeIcons[m]}</span>
                 <span className="door-label">{modeLabels[m]}</span>
               </button>
             ))}
@@ -339,15 +341,18 @@ export default function Home() {
 
         /* Doors */
         .door-btn {
-          padding: 20px 32px; border-radius: 20px;
+          display: flex; flex-direction: column; align-items: center; gap: 10px;
+          padding: 24px 28px; border-radius: 24px;
           background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.8);
           box-shadow: 0 6px 20px rgba(15,23,42,0.05); backdrop-filter: blur(14px);
-          transition: transform 0.15s ease, background 0.2s ease;
+          transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
           cursor: pointer; min-width: 100px;
         }
-        .door-btn:hover { background: rgba(255,255,255,0.8); transform: translateY(-2px) scale(1.02); }
+        .door-btn:hover { background: rgba(255,255,255,0.8); transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 30px rgba(15,23,42,0.08); }
         .door-btn:active { transform: scale(0.97); }
-        .door-label { font-size: 16px; font-weight: 500; color: #334155; }
+        .door-icon { font-size: 28px; color: #475569; transition: color 0.2s; }
+        .door-btn:hover .door-icon { color: #1e293b; }
+        .door-label { font-size: 15px; font-weight: 500; color: #334155; letter-spacing: 0.02em; }
 
         /* Subs */
         .sub-btn {
