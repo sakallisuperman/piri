@@ -85,8 +85,8 @@ export default function Home() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('dark');
   const [mode, setMode] = useState<Mode | null>(null);
-  const [gender, setGender] = useState<Gender | null>(null);
-  const [ageRange, setAgeRange] = useState<AgeRange | null>(null);
+  const [, setGender] = useState<Gender | null>(null);
+  const [, setAgeRange] = useState<AgeRange | null>(null);
   const [profileStep, setProfileStep] = useState<'gender' | 'age' | 'done'>('gender');
   const [showDoors, setShowDoors] = useState(false);
   const [showDoorPrompt, setShowDoorPrompt] = useState(false);
@@ -94,7 +94,7 @@ export default function Home() {
   const [subText, setSubText] = useState<string[]>([]);
   const [subCurrent, setSubCurrent] = useState('');
   const [orbVisible, setOrbVisible] = useState(false);
-  const [fadeProgress, setFadeProgress] = useState(0);
+  // fadeProgress removed — clean opacity transition
 
   const [bubbles] = useState<Bubble[]>(() =>
     Array.from({ length: 28 }).map((_, i) => ({
@@ -112,41 +112,20 @@ export default function Home() {
     return () => clearTimeout(t);
   }, []);
 
-  // After wake → slow cloud dissolve
+  // After wake → clean fade to white (rebirth)
   useEffect(() => {
     if (!wake.done) return;
 
     const t0 = setTimeout(() => setPhase('fade'), 500);
 
-    // Animate fadeProgress from 0 to 1 over ~3.5 seconds using requestAnimationFrame
-    let start: number | null = null;
-    let raf: number;
-    const duration = 3500;
-
-    const animate = (ts: number) => {
-      if (!start) start = ts;
-      const elapsed = ts - start;
-      const p = Math.min(1, elapsed / duration);
-      // Ease-in-out cubic
-      const eased = p < 0.5
-        ? 4 * p * p * p
-        : 1 - Math.pow(-2 * p + 2, 3) / 2;
-      setFadeProgress(eased);
-      if (p < 1) raf = requestAnimationFrame(animate);
-    };
-
+    // Simple opacity fade over ~2s, then switch to profile
     const t1 = setTimeout(() => {
-      raf = requestAnimationFrame(animate);
-    }, 600);
-
-    const t2 = setTimeout(() => {
       setPhase('profile');
       setOrbVisible(true);
-    }, 4400);
+    }, 2800);
 
     return () => {
-      [t0, t1, t2].forEach(clearTimeout);
-      if (raf) cancelAnimationFrame(raf);
+      [t0, t1].forEach(clearTimeout);
     };
   }, [wake.done]);
 
@@ -229,45 +208,15 @@ export default function Home() {
       {/* Light background (always present, behind dark overlay) */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
 
-      {/* Dark overlay with cloud dissolve via SVG turbulence mask */}
+      {/* Dark overlay — clean fade to white */}
       <div
         className="fixed inset-0 z-[1] pointer-events-none"
         style={{
-          opacity: isLight ? 0 : 1,
-          transition: isLight ? 'opacity 0.8s ease' : 'none',
+          background: 'linear-gradient(to bottom, #0a0d14, #050709)',
+          opacity: isDark ? 1 : isFade ? 0 : 0,
+          transition: 'opacity 2s ease-out',
         }}
-      >
-        {/* SVG filter for cloud/smoke dissolve */}
-        <svg className="absolute w-0 h-0">
-          <defs>
-            <filter id="cloud-dissolve">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.015"
-                numOctaves="4"
-                seed="3"
-                result="noise"
-              />
-              <feComponentTransfer in="noise" result="threshold">
-                <feFuncA type="discrete" tableValues={
-                  isFade
-                    ? `${1 - fadeProgress} ${fadeProgress < 0.7 ? 1 : 0}`
-                    : isDark ? '1 1' : '0 0'
-                } />
-              </feComponentTransfer>
-              <feComposite in="SourceGraphic" in2="threshold" operator="in" />
-            </filter>
-          </defs>
-        </svg>
-
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, #0a0d14, #050709)',
-            filter: isFade ? 'url(#cloud-dissolve)' : 'none',
-          }}
-        />
-      </div>
+      />
 
       {/* Ambient glow */}
       <div
@@ -306,8 +255,8 @@ export default function Home() {
           <div
             className="w-full max-w-[500px] text-center space-y-4 min-h-[180px] flex flex-col items-center justify-center"
             style={{
-              opacity: isFade ? Math.max(0, 1 - fadeProgress * 1.5) : 1,
-              transition: 'opacity 0.5s ease',
+              opacity: isFade ? 0 : 1,
+              transition: 'opacity 1.2s ease',
             }}
           >
             {wake.displayed.map((line, i) => (
@@ -478,12 +427,12 @@ export default function Home() {
         .gender-btn:active { transform: scale(0.97); }
 
         .gender-female {
-          background: linear-gradient(135deg, rgba(192,132,252,0.45), rgba(168,85,247,0.4), rgba(147,51,234,0.35));
-          color: #7e22ce;
+          background: linear-gradient(135deg, rgba(245,230,225,0.9), rgba(235,215,210,0.85), rgba(225,200,195,0.8));
+          color: #8b6f66;
         }
         .gender-male {
-          background: linear-gradient(135deg, rgba(125,211,252,0.4), rgba(56,189,248,0.35), rgba(14,165,233,0.3));
-          color: #0369a1;
+          background: linear-gradient(135deg, rgba(230,232,236,0.9), rgba(215,218,224,0.85), rgba(200,204,212,0.8));
+          color: #5a6170;
         }
 
         /* Age/profile buttons */

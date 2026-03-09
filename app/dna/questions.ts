@@ -32,14 +32,12 @@ export type Question = {
   options?: string[];
 };
 
-export const CHOICE_6 = [
-  'Hiç ben değil',
-  'Pek değil',
-  'Biraz',
-  'Oldukça',
-  'Çok',
-  'Tam ben',
-];
+// ───────────────────────────────────────────────
+// İlham: Jeffrey E. Young & Janet S. Klosko
+// "Reinventing Your Life" (Hayatı Yeniden Keşfedin)
+// Şema terapisi: erken dönem yaşam tuzakları (lifetraps)
+// ve karar alma kalıplarına etkisi
+// ───────────────────────────────────────────────
 
 export const CHOICE_5 = [
   'Kesinlikle katılmıyorum',
@@ -49,17 +47,26 @@ export const CHOICE_5 = [
   'Kesinlikle katılıyorum',
 ];
 
+export const CHOICE_6 = [
+  'Hiç ben değil',
+  'Pek değil',
+  'Biraz',
+  'Oldukça',
+  'Çok',
+  'Tam ben',
+];
+
 export const QUESTION_BANK: Question[] = [
-  // =========================================
-  // WORK — LAYER 1 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // İŞ (WORK) — KATMAN 1: Yüzey Kalıpları
+  // ═══════════════════════════════════════════
   {
     id: 'work_l1_q1',
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Yeni bir iş fırsatı bende heyecan yaratır.',
-    primary: 'risk',
+    text: 'İş hayatında bir şeylerin yanlış gideceği hissini sık sık yaşarım.',
+    primary: 'uncertainty',
     secondary: ['control'],
     options: CHOICE_6,
   },
@@ -68,9 +75,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Rol net değilse geri çekilirim.',
-    primary: 'uncertainty',
-    secondary: ['avoidance'],
+    text: 'Bir karar verirken "ya başarısız olursam" düşüncesi beni durdurur.',
+    primary: 'risk',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -78,9 +85,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Karar aldıktan sonra planı tekrar tekrar kontrol ederim.',
+    text: 'Başkalarının beni yetersiz bulacağı endişesi iş kararlarımı etkiler.',
     primary: 'agency',
-    secondary: ['control'],
+    secondary: ['approval', 'innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -88,9 +95,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Yanlış bir iş kararı uzun süre aklımda kalır.',
-    primary: 'regret',
-    secondary: ['innerCritic'],
+    text: 'Her şeyi mükemmel planlamadan harekete geçmek bana güvensiz gelir.',
+    primary: 'uncertainty',
+    secondary: ['perfectionism', 'control'],
     options: CHOICE_6,
   },
   {
@@ -98,10 +105,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Baskı altında da enerjimi koruyabilirim.',
-    primary: 'energy',
-    secondary: ['control'],
-    reverse: true,
+    text: 'Hata yaptığımda kendimi uzun süre affetmekte zorlanırım.',
+    primary: 'regret',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -109,9 +115,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Alıştığım iş düzenini bırakmak kolay değildir.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'İş yerinde kendimi kanıtlama ihtiyacı hiç bitmez gibi hissederim.',
+    primary: 'energy',
+    secondary: ['approval', 'perfectionism'],
     options: CHOICE_6,
   },
   {
@@ -119,9 +125,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Risk alırım ama ipler bende değilse huzursuz olurum.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Zor bir karar vermektense mevcut duruma katlanmayı tercih ederim.',
+    primary: 'attachment',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -129,9 +135,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Belirsizlik olsa da yolda netleşebileceğine inanırım.',
-    primary: 'uncertainty',
-    reverse: true,
+    text: 'Kontrolüm dışında gelişen durumlar beni orantısız derecede huzursuz eder.',
+    primary: 'agency',
+    secondary: ['control'],
     options: CHOICE_6,
   },
   {
@@ -139,21 +145,23 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 1,
     inputType: 'choice',
-    text: 'Kariyerimde yön değiştirmek beni diri tutar.',
+    text: 'İş hayatında yeni bir yola çıkmak bende daha çok heyecan değil, kaygı yaratır.',
     primary: 'risk',
-    
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // WORK — LAYER 2 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // İŞ (WORK) — KATMAN 2: Derin Kalıplar
+  // Şema tuzakları: Başarısızlık, Yüksek Standartlar,
+  // Boyun Eğme, Onay Arayışı
+  // ═══════════════════════════════════════════
   {
     id: 'work_l2_q1',
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Bir iş kararında hata yapmak, yetersiz görünmek gibi hissettirir.',
+    text: 'İçimde bir ses "ne yaparsan yap, yetmeyecek" der.',
     primary: 'regret',
     secondary: ['innerCritic', 'perfectionism'],
     options: CHOICE_6,
@@ -163,7 +171,7 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Başkalarının fikri iş kararlarımı düşündüğümden fazla etkiler.',
+    text: 'Başkalarının beklentilerini karşılamak, kendi isteklerimin önüne geçer.',
     primary: 'attachment',
     secondary: ['approval'],
     options: CHOICE_6,
@@ -173,9 +181,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Mükemmel plan yoksa harekete geçmek zor gelir.',
-    primary: 'uncertainty',
-    secondary: ['perfectionism', 'avoidance'],
+    text: 'Başarısızlık benim için sonuç değil, kimlik meselesidir — başarısız olmak "başarısız biri olmak" demektir.',
+    primary: 'regret',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -183,9 +191,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Yorulsam bile “devam etmeliyim” baskısı hissederim.',
-    primary: 'energy',
-    secondary: ['perfectionism'],
+    text: 'Kendi yolumu çizme fikri beni heyecanlandırsa da, bir o kadar da suçluluk duyarım.',
+    primary: 'agency',
+    secondary: ['approval'],
     options: CHOICE_6,
   },
   {
@@ -193,9 +201,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Kararı geciktirmek bazen beni geçici olarak rahatlatır.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'Bir karar vermeden önce güvende hissetmem neredeyse imkansızdır.',
+    primary: 'uncertainty',
+    secondary: ['control', 'avoidance'],
     options: CHOICE_6,
   },
   {
@@ -203,9 +211,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Kontrol kaybı, başarısızlıktan daha çok zorlar.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Durmak bile bir seçenekken, "durmamalıyım" baskısı beni tüketir.',
+    primary: 'energy',
+    secondary: ['perfectionism'],
     options: CHOICE_6,
   },
   {
@@ -213,7 +221,7 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'İş kararlarında “keşke” duygusu bende geç söner.',
+    text: 'Geçmişteki yanlış kararların ağırlığını hâlâ taşıyorum.',
     primary: 'regret',
     secondary: ['innerCritic'],
     options: CHOICE_6,
@@ -223,9 +231,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'İnsanların benden beklentisi, kendi isteğimin önüne geçebilir.',
+    text: 'Tanıdık mutsuzluk, belirsiz bir mutluluktan daha güvenli gelir.',
     primary: 'attachment',
-    secondary: ['approval'],
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -233,21 +241,21 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 2,
     inputType: 'choice',
-    text: 'Yeni bir başlangıç, içimde hem heyecan hem alarm yaratır.',
+    text: 'Risk aldığımda başarılı olsam bile "şansımdı" diye düşünürüm.',
     primary: 'risk',
-    
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // WORK — LAYER 3 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // İŞ (WORK) — KATMAN 3: Anlatı
+  // ═══════════════════════════════════════════
   {
     id: 'work_l3_q1',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Şu anda iş hayatında seni en çok düşündüren karar ne?',
+    text: 'İş hayatında tekrar tekrar düştüğün aynı tuzak ne?',
     primary: 'agency',
   },
   {
@@ -255,15 +263,15 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Bu kararı vermeni zorlaştıran asıl şey ne olabilir?',
-    primary: 'uncertainty',
+    text: 'Bu kararı verirken içinde hangi sesin ağır bastığını fark ediyorsun — senin sesin mi, başka birinin sesi mi?',
+    primary: 'attachment',
   },
   {
     id: 'work_l3_q3',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Yanlış karar verirsen en çok ne kaybetmekten korkuyorsun?',
+    text: 'Yanlış karar verirsen, kendine ne söylersin? Bu cümleyi daha önce kimden duydun?',
     primary: 'regret',
   },
   {
@@ -271,61 +279,61 @@ export const QUESTION_BANK: Question[] = [
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Bu kararı ertelemenin sana sağladığı geçici rahatlık ne?',
-    primary: 'attachment',
+    text: 'Bu kararı ertelemenin sana verdiği "sahte güvenlik" ne?',
+    primary: 'uncertainty',
   },
   {
     id: 'work_l3_q5',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Bu konuda kimin sesi senin sesinin önüne geçiyor?',
-    primary: 'attachment',
+    text: 'Mükemmel koşullar oluşsa bile harekete geçer miydin? Dürüstçe düşün.',
+    primary: 'risk',
   },
   {
     id: 'work_l3_q6',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Bu karar sonrası hayatında en çok neyin değişmesini istiyorsun?',
-    primary: 'energy',
+    text: 'Kimin onayını alırsan bu kararı daha rahat verirdin?',
+    primary: 'attachment',
   },
   {
     id: 'work_l3_q7',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Şu anda gerçekten yapmak istediğin şey ne?',
-    primary: 'risk',
+    text: 'Bu karardan kaçınırken kendini nasıl haklı çıkarıyorsun?',
+    primary: 'agency',
   },
   {
     id: 'work_l3_q8',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Seni durduran şey mantık mı, korku mu, alışkanlık mı?',
-    primary: 'uncertainty',
+    text: 'Şu anda gerçekten istediğin şeyi bir cümlede söyle.',
+    primary: 'energy',
   },
   {
     id: 'work_l3_q9',
     mode: 'work',
     layer: 3,
     inputType: 'text',
-    text: 'Bu kararı alırsan hangi tarafın rahatlayacak?',
-    primary: 'agency',
+    text: '5 yıl sonra bu anı hatırladığında, kendine ne demiş olmak istersin?',
+    primary: 'regret',
   },
 
-  // =========================================
-  // LIFE — LAYER 1 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // YOL (LIFE) — KATMAN 1: Yüzey Kalıpları
+  // ═══════════════════════════════════════════
   {
     id: 'life_l1_q1',
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Büyük bir hayat değişimi fikri beni canlı tutar.',
+    text: 'Hayatımı değiştirme fikri hep aklımda ama bir türlü harekete geçemiyorum.',
     primary: 'risk',
-    
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -333,9 +341,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Net plan yoksa büyük adım atmak istemem.',
-    primary: 'uncertainty',
-    secondary: ['control'],
+    text: 'Başkalarının yaşamlarına bakınca "ben nerede hata yaptım" diye düşünürüm.',
+    primary: 'regret',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -343,9 +351,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Hayat kararlarında kontrol duygusu benim için kritiktir.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Hayatımda bir şeylerin eksik olduğu hissi yakamı bırakmaz.',
+    primary: 'energy',
+    secondary: ['abandonment'],
     options: CHOICE_6,
   },
   {
@@ -353,9 +361,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Yanlış bir hayat kararı beni uzun süre geri götürür.',
-    primary: 'regret',
-    secondary: ['innerCritic'],
+    text: 'Büyük değişimlerden önce kendimi hazır hissetmem neredeyse imkansızdır.',
+    primary: 'uncertainty',
+    secondary: ['perfectionism', 'control'],
     options: CHOICE_6,
   },
   {
@@ -363,9 +371,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Yeni düzene adapte olmak bende hızlı olur.',
-    primary: 'energy',
-    reverse: true,
+    text: 'Alışkanlıklarımı bırakmak, bir parçamı kaybetmek gibi gelir.',
+    primary: 'attachment',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -373,9 +381,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Alıştığım hayat düzeninden kopmak zor gelir.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'Yanlış bir hayat kararı beni yıllarca geriye götürür diye düşünürüm.',
+    primary: 'regret',
+    secondary: ['innerCritic', 'control'],
     options: CHOICE_6,
   },
   {
@@ -383,9 +391,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Belirsizlik arttıkça karar erteleme eğilimim artar.',
-    primary: 'uncertainty',
-    secondary: ['avoidance'],
+    text: 'Hayatımın kontrolü başka insanların elindeymiş gibi hissederim.',
+    primary: 'agency',
+    secondary: ['control', 'abandonment'],
     options: CHOICE_6,
   },
   {
@@ -393,9 +401,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Hayatımı yeniden kurma fikri gözümü korkutmaz.',
-    primary: 'risk',
-    reverse: true,
+    text: 'Belirsizlik zamanlarında enerjim çok hızlı düşer.',
+    primary: 'energy',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -403,22 +411,25 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 1,
     inputType: 'choice',
-    text: 'Büyük kararlar bende enerji yükseltir.',
-    primary: 'energy',
+    text: 'Kendi ihtiyaçlarımı seslendirmek bana bencillik gibi gelir.',
+    primary: 'agency',
+    secondary: ['approval'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // LIFE — LAYER 2 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // YOL (LIFE) — KATMAN 2: Derin Kalıplar
+  // Şema tuzakları: Bağımlılık, Dayanıksızlık,
+  // Duygusal Yoksunluk, İç İçe Geçme
+  // ═══════════════════════════════════════════
   {
     id: 'life_l2_q1',
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Mükemmel koşullar oluşmadan adım atmak bana eksik hissettirir.',
-    primary: 'uncertainty',
-    secondary: ['perfectionism'],
+    text: 'Kendi başıma doğru kararı verebileceğime tam olarak güvenmiyorum.',
+    primary: 'agency',
+    secondary: ['control'],
     options: CHOICE_6,
   },
   {
@@ -426,9 +437,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Başkalarının “doğru hayat” tanımı beni etkiler.',
-    primary: 'attachment',
-    secondary: ['approval'],
+    text: 'Hayatta her şey "bir gün" başlayacakmış gibi beklerim ama o gün gelmez.',
+    primary: 'risk',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -436,9 +447,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Hayat kararlarında hata yapmak, kendime güvenimi sarsar.',
-    primary: 'regret',
-    secondary: ['innerCritic'],
+    text: 'İhtiyaçlarımın tam olarak karşılanacağına inancım düşüktür.',
+    primary: 'attachment',
+    secondary: ['abandonment'],
     options: CHOICE_6,
   },
   {
@@ -446,9 +457,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Belirsizlik yerine sınırlı ama tanıdık bir düzeni seçebilirim.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'Değişim istesem de "bu benim için fazla" duygusu ağır basar.',
+    primary: 'uncertainty',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -456,9 +467,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Kontrol hissim kaybolduğunda karar verme isteğim de düşer.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Başkalarını mutlu etmek için kendi yolumdan çıktığımı fark ederim.',
+    primary: 'attachment',
+    secondary: ['approval'],
     options: CHOICE_6,
   },
   {
@@ -466,9 +477,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: '“Daha iyisi olabilir” düşüncesi beni yerimde tutar.',
-    primary: 'regret',
-    secondary: ['perfectionism'],
+    text: 'Bir felaket olacakmış gibi hissetmek, gerçek bir tehlike olmasa bile beni durdurmaya yeter.',
+    primary: 'risk',
+    secondary: ['control'],
     options: CHOICE_6,
   },
   {
@@ -476,9 +487,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Büyük değişim düşüncesi bende hem umut hem yorgunluk yaratır.',
+    text: 'Mutlu olma hakkım olduğundan bazen emin değilim.',
     primary: 'energy',
-    
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -486,7 +497,7 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Karar vermeyince sorun çözülmese de tansiyonum düşer.',
+    text: 'Karar vermemek aslında benim için bir karar vermek — güvenli olanda kalmak.',
     primary: 'attachment',
     secondary: ['avoidance'],
     options: CHOICE_6,
@@ -496,21 +507,21 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 2,
     inputType: 'choice',
-    text: 'Hayatımı yeniden yönlendirmek içten içe bana çekici gelir.',
-    primary: 'risk',
-    
+    text: 'Hayatım değişse bile eski kalıplara geri döneceğimden korkuyorum.',
+    primary: 'regret',
+    secondary: ['perfectionism'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // LIFE — LAYER 3 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // YOL (LIFE) — KATMAN 3: Anlatı
+  // ═══════════════════════════════════════════
   {
     id: 'life_l3_q1',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Şu anda hayatında yön değiştirmek istediğin konu ne?',
+    text: 'Hayatında hangi kalıp sürekli tekrarlıyor?',
     primary: 'agency',
   },
   {
@@ -518,23 +529,23 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Bu değişimi geciktirmenin görünmeyen nedeni ne olabilir?',
-    primary: 'uncertainty',
+    text: 'Bu kalıp sana ne zaman başladı? En eski hatırladığın an ne?',
+    primary: 'attachment',
   },
   {
     id: 'life_l3_q3',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Yanlış seçim yaparsan en çok ne dağılır diye korkuyorsun?',
-    primary: 'regret',
+    text: 'Hayatını değiştirmeni engelleyen şey gerçekten koşullar mı, yoksa içindeki bir inanç mı?',
+    primary: 'uncertainty',
   },
   {
     id: 'life_l3_q4',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Şu anki düzen sana ne sağlıyor?',
+    text: 'Mevcut düzenin sana verdiği "gizli kazanç" ne?',
     primary: 'attachment',
   },
   {
@@ -542,51 +553,51 @@ export const QUESTION_BANK: Question[] = [
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Bu konuda en çok hangi sesi susturamıyorsun?',
-    primary: 'attachment',
+    text: 'Kimsenin seni yargılamayacağını bilsen, ne yapardın?',
+    primary: 'risk',
   },
   {
     id: 'life_l3_q6',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Değişim gerçekleşirse hayatında ilk ne hafifleyecek?',
-    primary: 'energy',
+    text: 'Hayatında neyi kaybetmekten bu kadar korkuyorsun ki yerinden kıpırdayamıyorsun?',
+    primary: 'regret',
   },
   {
     id: 'life_l3_q7',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Gerçekte hangi hayatı istiyorsun ama yüksek sesle söylemiyorsun?',
-    primary: 'risk',
+    text: 'Kendine hakkını vermediğin şey ne?',
+    primary: 'energy',
   },
   {
     id: 'life_l3_q8',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Bu kararı ertelemenin sana ödediği görünmez bedel ne?',
-    primary: 'regret',
+    text: 'Bu kararı verdiğinde kaybedeceğin şey ile kazanacağın şeyi yan yana koy.',
+    primary: 'agency',
   },
   {
     id: 'life_l3_q9',
     mode: 'life',
     layer: 3,
     inputType: 'text',
-    text: 'Bu konuda bugün tek bir adım atsan o ne olurdu?',
-    primary: 'agency',
+    text: 'Bugün yapabileceğin en küçük ama en dürüst adım ne olurdu?',
+    primary: 'risk',
   },
 
-  // =========================================
-  // LOVE — LAYER 1 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // AŞK (LOVE) — KATMAN 1: Yüzey Kalıpları
+  // ═══════════════════════════════════════════
   {
     id: 'love_l1_q1',
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'İlişkide belirsizlik bende hızlı tetiklenir.',
+    text: 'İlişkide bir sorun olduğunu hissedince hemen en kötü senaryoya atlarım.',
     primary: 'uncertainty',
     secondary: ['abandonment'],
     options: CHOICE_6,
@@ -596,9 +607,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Bir şey ters gidince hemen netleştirmek isterim.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Sevilmek için kendimden ödün vermem gerektiğini hissederim.',
+    primary: 'attachment',
+    secondary: ['approval'],
     options: CHOICE_6,
   },
   {
@@ -606,9 +617,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Duygusal risk almak bana doğal gelir.',
+    text: 'Yakınlık arttıkça içimde bir savunma mekanizması devreye girer.',
     primary: 'risk',
-    reverse: true,
+    secondary: ['avoidance', 'abandonment'],
     options: CHOICE_6,
   },
   {
@@ -616,7 +627,7 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Yanlış kişide kalmak fikri beni uzun süre düşündürür.',
+    text: 'İlişkide hata yapmaktan çok, aynı hatayı tekrarlamaktan korkarım.',
     primary: 'regret',
     secondary: ['innerCritic'],
     options: CHOICE_6,
@@ -626,9 +637,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Yakınlık arttıkça içimde geri çekilme isteği oluşabilir.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'Karşımdaki kişinin ne düşündüğünü bilmemek beni tüketir.',
+    primary: 'uncertainty',
+    secondary: ['control', 'abandonment'],
     options: CHOICE_6,
   },
   {
@@ -636,9 +647,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'İlişkide emek ve enerji koymak benim için kolaydır.',
+    text: 'İlişkide duygusal olarak çok fazla enerji harcadığımı hissediyorum.',
     primary: 'energy',
-    reverse: true,
+    secondary: ['approval'],
     options: CHOICE_6,
   },
   {
@@ -646,9 +657,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Belirsizlik uzadığında zihnim senaryo üretmeye başlar.',
-    primary: 'uncertainty',
-    secondary: ['abandonment'],
+    text: 'Bitmesi gereken bir şeyi bitirmek, başlamaktan daha zor gelir.',
+    primary: 'attachment',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -656,9 +667,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Bir karar alınca (kalmak/bitirmek) geri dönüp sorgularım.',
-    primary: 'regret',
-    secondary: ['innerCritic'],
+    text: 'Terk edilme korkusu kararlarımı fark etmeden yönlendirir.',
+    primary: 'agency',
+    secondary: ['abandonment'],
     options: CHOICE_6,
   },
   {
@@ -666,23 +677,25 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 1,
     inputType: 'choice',
-    text: 'Birine bağlanınca koparmak benim için zordur.',
-    primary: 'attachment',
-    reverse: true,
+    text: 'İlişkide ne istediğimi biliyorum ama söylemeye cesaret edemiyorum.',
+    primary: 'agency',
+    secondary: ['approval', 'avoidance'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // LOVE — LAYER 2 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // AŞK (LOVE) — KATMAN 2: Derin Kalıplar
+  // Şema tuzakları: Terk Edilme, Duygusal Yoksunluk,
+  // Kusurlu Olma, Boyun Eğme
+  // ═══════════════════════════════════════════
   {
     id: 'love_l2_q1',
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Netlik gelmeyince kendimde bir sorun arayabilirim.',
-    primary: 'regret',
-    secondary: ['abandonment', 'innerCritic'],
+    text: 'İçimde "gerçek beni görürlerse beni sevmezler" korkusu var.',
+    primary: 'attachment',
+    secondary: ['innerCritic', 'abandonment'],
     options: CHOICE_6,
   },
   {
@@ -690,9 +703,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Sevilmek kadar seçilmek de benim için önemlidir.',
+    text: 'Beni seçmeyen birine duygusal olarak daha çok bağlanırım.',
     primary: 'attachment',
-    secondary: ['approval'],
+    secondary: ['abandonment', 'approval'],
     options: CHOICE_6,
   },
   {
@@ -700,9 +713,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Aşkta hata yapmak, kendime duyduğum saygıyı etkiler.',
-    primary: 'regret',
-    secondary: ['innerCritic'],
+    text: 'Duygusal ihtiyaçlarımı dile getirmek bana zayıflık gibi gelir.',
+    primary: 'agency',
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
   {
@@ -710,9 +723,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Duygusal olarak emin olmadan bağlanmak bana zor gelir.',
-    primary: 'uncertainty',
-    secondary: ['control'],
+    text: 'İlişkide acı çekmek, yalnız kalmaktan daha katlanılır gelir.',
+    primary: 'risk',
+    secondary: ['abandonment'],
     options: CHOICE_6,
   },
   {
@@ -720,9 +733,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Kararsız kaldığımda geri çekilmek geçici bir güven sağlar.',
-    primary: 'attachment',
-    secondary: ['avoidance'],
+    text: 'Aşkta "doğru kişi" arayışı beni hiçbir zaman tatmin etmiyor.',
+    primary: 'uncertainty',
+    secondary: ['perfectionism'],
     options: CHOICE_6,
   },
   {
@@ -730,9 +743,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'İlişkide kontrol bende değilse huzursuz olurum.',
-    primary: 'agency',
-    secondary: ['control'],
+    text: 'Karşımdakini kaybetmemek için kendimi küçültebilirim.',
+    primary: 'attachment',
+    secondary: ['approval', 'abandonment'],
     options: CHOICE_6,
   },
   {
@@ -740,9 +753,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Beni seçmeyen birine duygusal olarak daha çok takılabilirim.',
-    primary: 'attachment',
-    secondary: ['abandonment', 'approval'],
+    text: 'İlişkide kontrol bende değilse sürekli bir tehdit algılarım.',
+    primary: 'agency',
+    secondary: ['control'],
     options: CHOICE_6,
   },
   {
@@ -750,9 +763,9 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Aşkta “en doğru kişi” fikri kararımı zorlaştırır.',
-    primary: 'uncertainty',
-    secondary: ['perfectionism'],
+    text: 'Geçmişteki ilişki acıları bugünkü kararlarımı hâlâ şekillendiriyor.',
+    primary: 'regret',
+    secondary: ['innerCritic'],
     options: CHOICE_6,
   },
   {
@@ -760,21 +773,21 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 2,
     inputType: 'choice',
-    text: 'Kalmak da gitmek de bazen aynı anda beni korkutur.',
+    text: 'Kalmak da gitmek de aynı anda beni korkutuyor çünkü ikisinde de kaybedecek bir şey var.',
     primary: 'risk',
-    
+    secondary: ['avoidance'],
     options: CHOICE_6,
   },
 
-  // =========================================
-  // LOVE — LAYER 3 (9)
-  // =========================================
+  // ═══════════════════════════════════════════
+  // AŞK (LOVE) — KATMAN 3: Anlatı
+  // ═══════════════════════════════════════════
   {
     id: 'love_l3_q1',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Şu anda aşkta seni en çok düşündüren karar ne?',
+    text: 'İlişkilerinde tekrar eden kalıp ne? Her seferinde aynı noktada mı tıkanıyorsun?',
     primary: 'agency',
   },
   {
@@ -782,23 +795,23 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bu kararı verememenin gerçek nedeni ne olabilir?',
-    primary: 'uncertainty',
+    text: 'Bu kalıbı ilk nerede öğrendin? İlk aile ortamında mı, yoksa ilk ilişkinde mi?',
+    primary: 'attachment',
   },
   {
     id: 'love_l3_q3',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Yanlış seçim yaparsan en çok neyin tekrarlanmasından korkuyorsun?',
-    primary: 'regret',
+    text: 'Bu ilişkide korktuğun şey gerçekten karşındaki kişiyle mi ilgili, yoksa kendi içindeki bir inançla mı?',
+    primary: 'uncertainty',
   },
   {
     id: 'love_l3_q4',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bu ilişkide seni tutan şey ne?',
+    text: 'Bu ilişkide seni tutan şey sevgi mi, alışkanlık mı, yoksa yalnızlık korkusu mu?',
     primary: 'attachment',
   },
   {
@@ -806,40 +819,40 @@ export const QUESTION_BANK: Question[] = [
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bu ilişkide seni iten şey ne?',
-    primary: 'risk',
+    text: 'Kendin olduğun için sevildiğini en son ne zaman hissettin?',
+    primary: 'energy',
   },
   {
     id: 'love_l3_q6',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bu konuda en çok hangi cümleyi kendine söylüyorsun?',
-    primary: 'regret',
+    text: 'Bu kararı verirken en çok kimin sesini duyuyorsun — kendi sesin mi?',
+    primary: 'agency',
   },
   {
     id: 'love_l3_q7',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Gerçekte ne olmasını istiyorsun?',
-    primary: 'agency',
+    text: 'Bu ilişki hakkında kendine söylediğin ama doğru olmadığını bildiğin şey ne?',
+    primary: 'regret',
   },
   {
     id: 'love_l3_q8',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bugün bu kararı vermeyi geciktirmenin sana sağladığı şey ne?',
-    primary: 'attachment',
+    text: 'Eğer bu kararın sonucunda acı çekeceksen, hangi acı seni büyütür?',
+    primary: 'risk',
   },
   {
     id: 'love_l3_q9',
     mode: 'love',
     layer: 3,
     inputType: 'text',
-    text: 'Bu konuda bir adım atsaydın, en dürüst adım ne olurdu?',
-    primary: 'energy',
+    text: 'Şu anda aşkta en dürüst adımın ne olurdu?',
+    primary: 'agency',
   },
 ];
 
@@ -852,12 +865,10 @@ export function getQuestionsForModeAndLayer(mode: Mode, layer: Layer) {
 }
 
 export function scoreChoiceIndex(index: number) {
-  // 0..4 => 0..4 (5-point scale, direct mapping)
   return index;
 }
 
 export function scoreChoiceIndex6(index: number) {
-  // Legacy 6-point: 0..5 => 0..3
   if (index <= 1) return 0;
   if (index === 2) return 1;
   if (index === 3) return 2;
