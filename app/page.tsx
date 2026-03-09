@@ -8,7 +8,7 @@ import { usePiriVoice } from './hooks/usePiriVoice';
 type Mode = 'work' | 'life' | 'love';
 type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
 type Gender = 'female' | 'male';
-type AgeRange = '18-22' | '23-27' | '28-32' | '33+';
+type AgeRange = '-23' | '23-32' | '32+';
 
 type Bubble = {
   id: number; x: number; size: number; delay: number;
@@ -113,6 +113,11 @@ export default function Home() {
 
   // Track voice triggers to avoid double-firing
   const voiceFired = useRef<Set<string>>(new Set());
+  // Stable ref for voice.speak to avoid effect re-triggers
+  const voiceSpeakRef = useRef(voice.speak);
+  const voiceStopRef = useRef(voice.stop);
+  voiceSpeakRef.current = voice.speak;
+  voiceStopRef.current = voice.stop;
 
   const [bubbles] = useState<Bubble[]>(() =>
     Array.from({ length: 28 }).map((_, i) => ({
@@ -125,12 +130,12 @@ export default function Home() {
 
   const wake = useTerminal(WAKE_LINES, phase === 'wake');
 
-  // Trigger voice only once per key
+  // Trigger voice only once per key (stable — no deps on voice object)
   const fireVoice = useCallback((key: string, text: string) => {
     if (voiceFired.current.has(key)) return;
     voiceFired.current.add(key);
-    voice.speak(text);
-  }, [voice]);
+    voiceSpeakRef.current(text);
+  }, []);
 
   // ── Phase transitions ──
 
@@ -243,7 +248,7 @@ export default function Home() {
 
   function selectDoor(m: Mode) {
     handleInteraction();
-    voice.stop(); // stop current voice if playing
+    voiceStopRef.current(); // stop current voice if playing
     // Reset voice trigger for door so it can fire for new mode
     voiceFired.current.delete(`door_${m}`);
     setMode(m);
@@ -258,7 +263,7 @@ export default function Home() {
 
   function selectSub(value: string) {
     if (!mode) return;
-    voice.stop();
+    voiceStopRef.current();
     localStorage.setItem('piri_mode', mode);
     localStorage.setItem('piri_sub', value);
     localStorage.setItem('piri_lang', 'tr');
@@ -266,7 +271,7 @@ export default function Home() {
   }
 
   function goBack() {
-    voice.stop();
+    voiceStopRef.current();
     setMode(null);
     setPhase('light');
     setShowDoors(true);
@@ -400,8 +405,10 @@ export default function Home() {
                 <p className="piri-label">Piri</p>
                 <p className="text-xl text-slate-900">Yaş aralığın?</p>
                 <div className="flex items-center justify-center gap-3 pt-2">
-                  {(['18-22', '23-27', '28-32', '33+'] as AgeRange[]).map((a) => (
-                    <button key={a} onClick={() => selectAge(a)} className="profile-btn">{a}</button>
+                  {(['-23', '23-32', '32+'] as AgeRange[]).map((a) => (
+                    <button key={a} onClick={() => selectAge(a)} className="profile-btn">
+                      {a === '-23' ? '23 altı' : a === '32+' ? '32 üstü' : a}
+                    </button>
                   ))}
                 </div>
               </div>
