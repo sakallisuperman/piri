@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PiriOrb from './components/PiriOrb';
+import { usePiriVoice } from './hooks/usePiriVoice';
 
 type Mode = 'work' | 'life' | 'love';
 type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
@@ -14,6 +15,18 @@ type Bubble = {
   dur: number; drift: number; blur: number; op: number;
 };
 
+// ── Voice lines ──
+const VOICE_WAKE = 'Geldin. Karar almışsın. Artık Piri seninle.';
+const VOICE_PROFILE_GENDER = 'Seni tanımam lazım. Sadece iki soru.';
+const VOICE_PROFILE_AGE = 'Yaş aralığın?';
+const VOICE_DOORS = 'Yeni kararlar almak için bir kapı seç.';
+const VOICE_DOOR: Record<Mode, string> = {
+  work: 'İş kapısı. Düğümü göster.',
+  life: 'Yol kapısı. Neyi değiştirmek istiyorsun?',
+  love: 'Aşk kapısı. Riski göster.',
+};
+
+// ── Terminal lines (visual only) ──
 const WAKE_LINES = [
   { text: 'Geldin.', pause: 800 },
   { text: 'Karar almışsın.', pause: 1200 },
@@ -83,6 +96,7 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean) 
 
 export default function Home() {
   const router = useRouter();
+  const voice = usePiriVoice();
   const [phase, setPhase] = useState<Phase>('dark');
   const [mode, setMode] = useState<Mode | null>(null);
   const [, setGender] = useState<Gender | null>(null);
@@ -94,7 +108,11 @@ export default function Home() {
   const [subText, setSubText] = useState<string[]>([]);
   const [subCurrent, setSubCurrent] = useState('');
   const [orbVisible, setOrbVisible] = useState(false);
-  // fadeProgress removed — clean opacity transition
+  const [orbSide, setOrbSide] = useState(false); // orb docked to side
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  // Track voice triggers to avoid double-firing
+  const voiceFired = useRef<Set<string>>(new Set());
 
   const [bubbles] = useState<Bubble[]>(() =>
     Array.from({ length: 28 }).map((_, i) => ({
@@ -107,31 +125,71 @@ export default function Home() {
 
   const wake = useTerminal(WAKE_LINES, phase === 'wake');
 
+  // Trigger voice only once per key
+  const fireVoice = useCallback((key: string, text: string) => {
+    if (voiceFired.current.has(key)) return;
+    voiceFired.current.add(key);
+    voice.speak(text);
+  }, [voice]);
+
+  // ── Phase transitions ──
+
   useEffect(() => {
     const t = setTimeout(() => setPhase('wake'), 800);
     return () => clearTimeout(t);
   }, []);
 
-  // After wake → clean fade to white (rebirth)
+  // Voice: wake line (plays alongside terminal animation)
+  useEffect(() => {
+    if (phase === 'wake') {
+      // Small delay to let text start first
+      const t = setTimeout(() => fireVoice('wake', VOICE_WAKE), 600);
+      return () => clearTimeout(t);
+    }
+  }, [phase, fireVoice]);
+
+  // After wake → clean fade to white
   useEffect(() => {
     if (!wake.done) return;
-
     const t0 = setTimeout(() => setPhase('fade'), 500);
-
-    // Simple opacity fade over ~2s, then switch to profile
     const t1 = setTimeout(() => {
       setPhase('profile');
       setOrbVisible(true);
     }, 2800);
-
-    return () => {
-      [t0, t1].forEach(clearTimeout);
-    };
+    return () => { [t0, t1].forEach(clearTimeout); };
   }, [wake.done]);
 
-  // Sub typing
+  // Voice: profile gender step
+  useEffect(() => {
+    if (phase === 'profile' && profileStep === 'gender') {
+      const t = setTimeout(() => fireVoice('profile_gender', VOICE_PROFILE_GENDER), 800);
+      return () => clearTimeout(t);
+    }
+  }, [phase, profileStep, fireVoice]);
+
+  // Voice: profile age step
+  useEffect(() => {
+    if (phase === 'profile' && profileStep === 'age') {
+      fireVoice('profile_age', VOICE_PROFILE_AGE);
+    }
+  }, [phase, profileStep, fireVoice]);
+
+  // Voice: doors prompt
+  useEffect(() => {
+    if (showDoorPrompt && phase === 'light') {
+      const t = setTimeout(() => fireVoice('doors', VOICE_DOORS), 300);
+      return () => clearTimeout(t);
+    }
+  }, [showDoorPrompt, phase, fireVoice]);
+
+  // Voice + typing: sub phase (door selected)
   useEffect(() => {
     if (phase !== 'sub' || !mode) return;
+
+    // Voice
+    fireVoice(`door_${mode}`, VOICE_DOOR[mode]);
+
+    // Typing animation
     const lines = DOOR_LINES[mode];
     let cancelled = false;
     let t = 300;
@@ -146,21 +204,36 @@ export default function Home() {
       t = end + 500;
     });
 
-    setTimeout(() => { if (!cancelled) setShowSubs(true); }, t + 200);
+    setTimeout(() => {
+      if (!cancelled) {
+        setShowSubs(true);
+        // Orb moves to side when subs appear
+        setOrbSide(true);
+      }
+    }, t + 200);
+
     return () => { cancelled = true; };
-  }, [phase, mode]);
+  }, [phase, mode, fireVoice]);
+
+  // ── User interactions ──
+
+  // Enable audio on first interaction (browser autoplay policy)
+  function handleInteraction() {
+    if (!userInteracted) setUserInteracted(true);
+  }
 
   function selectGender(g: Gender) {
+    handleInteraction();
     setGender(g);
     localStorage.setItem('piri_gender', g);
     setProfileStep('age');
   }
 
   function selectAge(a: AgeRange) {
+    handleInteraction();
     setAgeRange(a);
     localStorage.setItem('piri_age', a);
     setProfileStep('done');
-    // Transition to doors
     setTimeout(() => {
       setPhase('light');
       setShowDoorPrompt(true);
@@ -169,17 +242,23 @@ export default function Home() {
   }
 
   function selectDoor(m: Mode) {
+    handleInteraction();
+    voice.stop(); // stop current voice if playing
+    // Reset voice trigger for door so it can fire for new mode
+    voiceFired.current.delete(`door_${m}`);
     setMode(m);
     setPhase('sub');
     setShowDoors(false);
     setShowDoorPrompt(false);
     setShowSubs(false);
+    setOrbSide(false);
     setSubText([]);
     setSubCurrent('');
   }
 
   function selectSub(value: string) {
     if (!mode) return;
+    voice.stop();
     localStorage.setItem('piri_mode', mode);
     localStorage.setItem('piri_sub', value);
     localStorage.setItem('piri_lang', 'tr');
@@ -187,11 +266,13 @@ export default function Home() {
   }
 
   function goBack() {
+    voice.stop();
     setMode(null);
     setPhase('light');
     setShowDoors(true);
     setShowDoorPrompt(true);
     setShowSubs(false);
+    setOrbSide(false);
     setSubText([]);
     setSubCurrent('');
   }
@@ -205,10 +286,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full overflow-hidden relative select-none">
-      {/* Light background (always present, behind dark overlay) */}
+      {/* Light background */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
 
-      {/* Dark overlay — clean fade to white */}
+      {/* Dark overlay — clean fade */}
       <div
         className="fixed inset-0 z-[1] pointer-events-none"
         style={{
@@ -247,6 +328,30 @@ export default function Home() {
         ))}
       </div>
 
+      {/* ── Orb (center or side-docked) ── */}
+      {isLight && (
+        <div
+          className="fixed z-[15] transition-all duration-[800ms] ease-in-out"
+          style={orbSide ? {
+            // Side-docked: bottom-left, small
+            bottom: '24px',
+            left: '24px',
+            opacity: orbVisible ? 0.85 : 0,
+            transform: orbVisible ? 'scale(0.5)' : 'scale(0.3)',
+          } : {
+            // Center: above content
+            top: '50%',
+            left: '50%',
+            opacity: orbVisible ? 1 : 0,
+            transform: orbVisible
+              ? 'translate(-50%, -50%) translateY(-120px) scale(1)'
+              : 'translate(-50%, -50%) translateY(-120px) scale(0.6)',
+          }}
+        >
+          <PiriOrb size={140} speaking={voice.isSpeaking} />
+        </div>
+      )}
+
       {/* Content */}
       <div className="relative z-[10] flex min-h-screen flex-col items-center justify-center px-5">
 
@@ -270,21 +375,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* Light: Orb + content */}
+        {/* Light: content (orb is separate fixed element now) */}
         {isLight && (
           <>
-            <div
-              className="relative mb-8"
-              style={{
-                opacity: orbVisible ? 1 : 0,
-                transform: orbVisible ? 'scale(1)' : 'scale(0.6)',
-                transition: 'opacity 1.5s ease, transform 1.5s ease',
-              }}
-            >
-              <PiriOrb size={140} />
-            </div>
+            {/* Spacer for center orb */}
+            {!orbSide && <div className="h-[180px]" />}
 
-            {/* Profile: Piri speaks + Gender + Age */}
+            {/* Profile: Gender */}
             {isProfile && profileStep === 'gender' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
                 <p className="piri-label">Piri</p>
@@ -297,6 +394,7 @@ export default function Home() {
               </div>
             )}
 
+            {/* Profile: Age */}
             {isProfile && profileStep === 'age' && (
               <div className="w-full max-w-[440px] text-center space-y-5 animate-fadeUp">
                 <p className="piri-label">Piri</p>
@@ -309,10 +407,12 @@ export default function Home() {
               </div>
             )}
 
+            {/* Door prompt */}
             {showDoorPrompt && (
               <p className="text-lg text-slate-700 mb-8 animate-fadeUp text-center">{DOOR_PROMPT}</p>
             )}
 
+            {/* Sub typing */}
             {phase === 'sub' && (
               <div className="w-full max-w-[500px] text-center space-y-2 mb-8">
                 {subText.map((line, i) => (
@@ -326,6 +426,7 @@ export default function Home() {
               </div>
             )}
 
+            {/* Door buttons */}
             {showDoors && phase === 'light' && (
               <div className="flex items-center justify-center gap-5 animate-fadeUp">
                 {(['work', 'life', 'love'] as Mode[]).map((m) => (
@@ -337,6 +438,7 @@ export default function Home() {
               </div>
             )}
 
+            {/* Sub-category buttons */}
             {showSubs && phase === 'sub' && mode && (
               <div className="w-full max-w-[440px] space-y-3 animate-fadeUp">
                 {SUBS[mode].map((sub) => (
@@ -352,6 +454,21 @@ export default function Home() {
           </>
         )}
       </div>
+
+      {/* ── Piri speaking indicator (speech bubble) ── */}
+      {voice.isSpeaking && orbSide && (
+        <div className="fixed bottom-[90px] left-[28px] z-[16] animate-fadeUp">
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl rounded-bl-md px-4 py-2 shadow-sm border border-white/70">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         .terminal-line {
@@ -406,7 +523,6 @@ export default function Home() {
         .back-btn { padding: 8px 16px; border-radius: 999px; background: transparent; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; transition: color 0.2s; }
         .back-btn:hover { color: #475569; }
 
-        /* Piri label — bold, visible */
         .piri-label {
           font-size: 22px; font-weight: 300; letter-spacing: 0.25em;
           text-transform: uppercase;
@@ -415,7 +531,6 @@ export default function Home() {
           background-clip: text;
         }
 
-        /* Gender buttons — gradient backgrounds */
         .gender-btn {
           padding: 18px 36px; border-radius: 20px;
           font-size: 17px; font-weight: 600; cursor: pointer;
@@ -435,7 +550,6 @@ export default function Home() {
           color: #3b8fd4;
         }
 
-        /* Age/profile buttons */
         .profile-btn {
           padding: 14px 24px; border-radius: 18px;
           background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8);

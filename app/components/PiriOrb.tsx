@@ -4,7 +4,7 @@
 // Gradient waves rotating, pulsing glow, breathing animation
 // Colors: Piri palette (blue-cyan-purple-white)
 
-export default function PiriOrb({ size = 150 }: { size?: number }) {
+export default function PiriOrb({ size = 150, speaking = false }: { size?: number; speaking?: boolean }) {
   const s = size;
   const half = s / 2;
 
@@ -43,17 +43,17 @@ export default function PiriOrb({ size = 150 }: { size?: number }) {
           inset: -${s * 0.25}px;
           border-radius: 999px;
           background: radial-gradient(circle,
-            rgba(120, 180, 255, 0.35),
-            rgba(140, 120, 255, 0.15) 50%,
+            rgba(120, 180, 255, ${speaking ? '0.55' : '0.35'}),
+            rgba(140, 120, 255, ${speaking ? '0.25' : '0.15'}) 50%,
             transparent 70%
           );
           filter: blur(${s * 0.15}px);
-          animation: glowBreathe 4s ease-in-out infinite;
+          animation: glowBreathe ${speaking ? '1.2s' : '4s'} ease-in-out infinite;
         }
 
         @keyframes glowBreathe {
-          0%, 100% { transform: scale(0.95); opacity: 0.7; }
-          50% { transform: scale(1.08); opacity: 1; }
+          0%, 100% { transform: scale(${speaking ? '0.9' : '0.95'}); opacity: ${speaking ? '0.8' : '0.7'}; }
+          50% { transform: scale(${speaking ? '1.15' : '1.08'}); opacity: 1; }
         }
 
         .piri-siri-orb {
@@ -91,7 +91,7 @@ export default function PiriOrb({ size = 150 }: { size?: number }) {
             rgba(200, 160, 255, 0.6),
             rgba(100, 180, 255, 0.9)
           );
-          animation: spinSlow 8s linear infinite;
+          animation: spinSlow ${speaking ? '3s' : '8s'} linear infinite;
           filter: blur(${s * 0.12}px);
         }
 
@@ -104,7 +104,7 @@ export default function PiriOrb({ size = 150 }: { size?: number }) {
             rgba(100, 220, 255, 0.4),
             rgba(255, 255, 255, 0.6)
           );
-          animation: spinMed 6s linear infinite reverse;
+          animation: spinMed ${speaking ? '2.5s' : '6s'} linear infinite reverse;
           filter: blur(${s * 0.08}px);
         }
 
@@ -135,7 +135,7 @@ export default function PiriOrb({ size = 150 }: { size?: number }) {
             rgba(200, 220, 255, 0.6) 50%,
             rgba(160, 180, 255, 0.1) 100%
           );
-          animation: centerPulse 3s ease-in-out infinite;
+          animation: centerPulse ${speaking ? '1s' : '3s'} ease-in-out infinite;
           filter: blur(${s * 0.02}px);
         }
 
