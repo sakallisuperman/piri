@@ -333,23 +333,18 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ── Orb (center or side-docked) ── */}
+      {/* ── Orb (always centered, scales down in sub phase) ── */}
       {isLight && (
         <div
           className="fixed z-[15] transition-all duration-[800ms] ease-in-out"
-          style={orbSide ? {
-            // Side-docked: bottom-left, small
-            bottom: '24px',
-            left: '24px',
-            opacity: orbVisible ? 0.85 : 0,
-            transform: orbVisible ? 'scale(0.5)' : 'scale(0.3)',
-          } : {
-            // Center: above content
+          style={{
             top: '50%',
             left: '50%',
             opacity: orbVisible ? 1 : 0,
             transform: orbVisible
-              ? 'translate(-50%, -50%) translateY(-120px) scale(1)'
+              ? orbSide
+                ? 'translate(-50%, -50%) translateY(-120px) scale(0.55)'
+                : 'translate(-50%, -50%) translateY(-120px) scale(1)'
               : 'translate(-50%, -50%) translateY(-120px) scale(0.6)',
           }}
         >
@@ -462,10 +457,10 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── Piri speaking indicator (speech bubble) ── */}
-      {voice.isSpeaking && orbSide && (
-        <div className="fixed bottom-[90px] left-[28px] z-[16] animate-fadeUp">
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl rounded-bl-md px-4 py-2 shadow-sm border border-white/70">
+      {/* ── Piri speaking indicator (centered under orb) ── */}
+      {voice.isSpeaking && (
+        <div className="fixed z-[16] animate-fadeUp" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) translateY(10px)' }}>
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl px-4 py-2 shadow-sm border border-white/70">
             <div className="flex items-center gap-2">
               <div className="flex gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '0ms' }} />

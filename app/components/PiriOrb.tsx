@@ -62,16 +62,21 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
           height: ${s}px;
           border-radius: 999px;
           overflow: hidden;
-          animation: orbFloat 6s ease-in-out infinite;
+          animation: orbBreathe ${speaking ? '2s' : '4.5s'} ease-in-out infinite, orbFloat 6s ease-in-out infinite;
           box-shadow:
-            0 0 ${s * 0.4}px rgba(100, 160, 255, 0.2),
-            0 0 ${s * 0.13}px rgba(130, 100, 255, 0.15),
+            0 0 ${s * 0.4}px rgba(100, 160, 255, ${speaking ? '0.35' : '0.2'}),
+            0 0 ${s * 0.13}px rgba(130, 100, 255, ${speaking ? '0.25' : '0.15'}),
             inset 0 0 ${s * 0.2}px rgba(255, 255, 255, 0.3);
         }
 
         @keyframes orbFloat {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-${s * 0.04}px); }
+        }
+
+        @keyframes orbBreathe {
+          0%, 100% { transform: scale(${speaking ? '0.93' : '0.96'}); }
+          50% { transform: scale(${speaking ? '1.08' : '1.04'}); }
         }
 
         /* Gradient layers — rotating in different directions/speeds */
