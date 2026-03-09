@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PiriOrb from './components/PiriOrb';
 import { usePiriVoice } from './hooks/usePiriVoice';
+import { updateProfile } from './lib/profile';
 
 type Mode = 'work' | 'life' | 'love';
 type Phase = 'dark' | 'wake' | 'fade' | 'profile' | 'light' | 'sub';
@@ -231,6 +232,7 @@ export default function Home() {
     handleInteraction();
     setGender(g);
     localStorage.setItem('piri_gender', g);
+    updateProfile({ gender: g });
     setProfileStep('age');
   }
 
@@ -238,6 +240,7 @@ export default function Home() {
     handleInteraction();
     setAgeRange(a);
     localStorage.setItem('piri_age', a);
+    updateProfile({ ageRange: a });
     setProfileStep('done');
     setTimeout(() => {
       setPhase('light');
@@ -267,6 +270,7 @@ export default function Home() {
     localStorage.setItem('piri_mode', mode);
     localStorage.setItem('piri_sub', value);
     localStorage.setItem('piri_lang', 'tr');
+    updateProfile({ mode, sub: value });
     router.push('/dna/test');
   }
 
@@ -333,8 +337,8 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ── Orb (always centered, scales down in sub phase) ── */}
-      {isLight && (
+      {/* ── Orb (centered top for profile/light, hidden in sub phase) ── */}
+      {isLight && !orbSide && (
         <div
           className="fixed z-[15] transition-all duration-[800ms] ease-in-out"
           style={{
@@ -342,9 +346,7 @@ export default function Home() {
             left: '50%',
             opacity: orbVisible ? 1 : 0,
             transform: orbVisible
-              ? orbSide
-                ? 'translate(-50%, -50%) translateY(-120px) scale(0.55)'
-                : 'translate(-50%, -50%) translateY(-120px) scale(1)'
+              ? 'translate(-50%, -50%) translateY(-120px) scale(1)'
               : 'translate(-50%, -50%) translateY(-120px) scale(0.6)',
           }}
         >
@@ -450,6 +452,10 @@ export default function Home() {
                 ))}
                 <div className="text-center mt-4">
                   <button onClick={goBack} className="back-btn">← Kapılara dön</button>
+                </div>
+                {/* Inline breathing orb below sub buttons */}
+                <div className="flex justify-center pt-6 animate-fadeUp">
+                  <PiriOrb size={70} speaking={voice.isSpeaking} />
                 </div>
               </div>
             )}

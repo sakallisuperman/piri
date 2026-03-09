@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { updateProfile } from '../lib/profile';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function SignupPage() {
     localStorage.setItem('piri_user_name', name.trim());
     localStorage.setItem('piri_user_email', email.trim());
     localStorage.setItem('piri_signed_up', 'true');
+    updateProfile({ name: name.trim(), email: email.trim() });
 
     // Small delay for feel
     setTimeout(() => {

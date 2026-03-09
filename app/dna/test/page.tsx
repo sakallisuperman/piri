@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getQuestionsForMode,
@@ -28,7 +28,7 @@ const AGREE_COLORS = [
 
 const AGREE_LABELS_SHORT = ['✕', '−', '○', '+', '✓'];
 
-export default function DnaTestPage() {
+function DnaTestInner() {
   const router = useRouter();
 
   const mode = ((typeof window !== 'undefined'
@@ -55,26 +55,24 @@ export default function DnaTestPage() {
     text: '',
   });
   const [animating, setAnimating] = useState(false);
+  const initializedRef = useRef(false);
 
-  // Check if returning from signup (start at layer 2)
-  const [startLayer] = useState<number>(() => {
-    if (typeof window === 'undefined') return 1;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('layer') === '2') {
-      // Find first layer 2 question index
+  // Set initial index based on ?layer=2 param (after signup)
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const layerParam = new URLSearchParams(window.location.search).get('layer');
+    const isSignedUp = localStorage.getItem('piri_signed_up') === 'true';
+
+    if (layerParam === '2' && isSignedUp) {
       const qs = getQuestionsForMode(mode);
       const idx = qs.findIndex(q => q.layer === 2);
-      return idx >= 0 ? idx : 0;
+      if (idx >= 0) {
+        setCurrentIndex(idx);
+      }
     }
-    return 0;
-  });
-
-  // Set initial index based on startLayer
-  const [initialSet, setInitialSet] = useState(false);
-  if (!initialSet && startLayer > 0 && currentIndex === 0) {
-    setCurrentIndex(startLayer);
-    setInitialSet(true);
-  }
+  }, [mode]);
 
   const question = questions[currentIndex];
 
@@ -84,6 +82,8 @@ export default function DnaTestPage() {
 
     if (!nextQuestion) {
       localStorage.setItem(`piri_answers_${mode}`, JSON.stringify(nextAnswers));
+      // Clean up partial answers
+      localStorage.removeItem(`piri_answers_${mode}_partial`);
       router.push('/dna/result');
       return;
     }
@@ -284,5 +284,18 @@ export default function DnaTestPage() {
         }
       `}</style>
     </main>
+  );
+}
+
+export default function DnaTestPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+        <div className="relative text-slate-500">Yükleniyor...</div>
+      </main>
+    }>
+      <DnaTestInner />
+    </Suspense>
   );
 }

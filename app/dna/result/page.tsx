@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import PiriOrb from '../../components/PiriOrb';
+import { updateProfile } from '../../lib/profile';
 import {
   getQuestionsForMode,
   scoreChoiceIndex,
@@ -41,6 +43,8 @@ type AIAnalysis = {
   };
 };
 
+type Phase = 'insight' | 'simulation' | 'dialog';
+
 function signalLabel(signal: ShadowSignal) {
   const map: Record<ShadowSignal, string> = {
     perfectionism: 'Mükemmeliyet baskısı',
@@ -53,21 +57,176 @@ function signalLabel(signal: ShadowSignal) {
   return map[signal] || signal;
 }
 
+function signalEmoji(signal: ShadowSignal) {
+  const map: Record<ShadowSignal, string> = {
+    perfectionism: '🎯',
+    approval: '👁',
+    abandonment: '🌊',
+    control: '🔒',
+    avoidance: '🛡',
+    innerCritic: '⚡',
+  };
+  return map[signal] || '◆';
+}
+
 function dnaCode(scores: Scores) {
   const band = (v: number) => (v <= 33 ? 0 : v <= 66 ? 1 : 2);
   return `R${band(scores.risk)}-U${band(scores.uncertainty)}-G${band(scores.regret)}-A${band(scores.agency)}-E${band(scores.energy)}-T${band(scores.attachment)}`;
 }
 
-// Fallback comment when AI is loading or fails
 function fallbackComment(topSignals: { key: ShadowSignal; value: number }[]) {
   const top = topSignals[0]?.key;
-  if (top === 'avoidance') return 'Kararsız değilsin. Bir şeyi açık tutarak kendini koruyorsun.';
-  if (top === 'control') return 'Sorun risk değil. Kontrolü kaybetme ihtimali.';
-  if (top === 'perfectionism') return 'Sorun cesaret değil. Doğru olanı kusursuz seçme baskısı.';
-  if (top === 'approval') return 'Kendi sesin var. Ama başka sesler onu bastırabiliyor.';
-  if (top === 'abandonment') return 'Belirsizlik senin için sadece belirsizlik değil. Tetiklenme alanı.';
-  if (top === 'innerCritic') return 'En sert baskı dışarıdan değil. İçeriden geliyor olabilir.';
-  return 'Bir karar haritası oluştu. Şimdi paterni daha net okuyabiliriz.';
+  const second = topSignals[1]?.key;
+
+  const comments: Record<ShadowSignal, string[]> = {
+    avoidance: [
+      'Kararsız değilsin — bir şeyi açık tutarak kendini koruyorsun.',
+      'Ertelemek senin için bir karar. Ama bedeli görünmez birikir.',
+    ],
+    control: [
+      'Sorun cesaret değil. Kontrolü kaybetme ihtimali seni durduruyor.',
+      'Her şeyi hesaplayamazsın. Ama bunu bilmek seni rahatlatmıyor.',
+    ],
+    perfectionism: [
+      'Yüksek standartların karar almayı zorlaştırıyor. "Yeterince iyi" senin için yeterli değil.',
+      'Kusursuz zamanlamayı bekliyorsun. O zaman hiç gelmeyecek.',
+    ],
+    approval: [
+      'Kendi sesin var. Ama başka sesler onu bastırıyor.',
+      'Başkalarının ne düşüneceği, kendi istediğinden daha ağır basıyor.',
+    ],
+    abandonment: [
+      'Belirsizlik senin için sadece belirsizlik değil. Bir tetiklenme alanı.',
+      'Kaybetme korkusu seni hareket edemez hale getiriyor.',
+    ],
+    innerCritic: [
+      'En sert baskı dışarıdan değil — içeriden geliyor.',
+      'İçindeki ses "yetmezsin" diyor. Bu ses sana ait değil.',
+    ],
+  };
+
+  const topComments = comments[top || 'avoidance'];
+  const mainComment = topComments[Math.floor(Math.random() * topComments.length)];
+
+  let secondPart = '';
+  if (second) {
+    const secondLabels: Record<ShadowSignal, string> = {
+      avoidance: 'Kaçınma eğilimin bunu pekiştiriyor.',
+      control: 'Kontrol ihtiyacın bunu derinleştiriyor.',
+      perfectionism: 'Mükemmeliyetçiliğin bunu besliyor.',
+      approval: 'Onay arayışın bunu güçlendiriyor.',
+      abandonment: 'Kaybetme korkun bunu tetikliyor.',
+      innerCritic: 'İçsel eleştirmenin bunu besliyor.',
+    };
+    secondPart = ' ' + secondLabels[second];
+  }
+
+  return mainComment + secondPart;
+}
+
+// Hardcoded scenarios for when AI is unavailable
+function getHardcodedScenarios(mode: string): Scenario[] {
+  if (mode === 'work') {
+    return [
+      {
+        title: 'Hemen hareket edersen',
+        timeline: [
+          { period: 'İlk 7 gün', text: 'Karar vermenin verdiği enerji ve rahatlama. Ama hemen ardından şüphe dalgası gelir.' },
+          { period: '1-2 ay', text: 'Yeni düzene alışma sancıları. Eski kalıplar geri çekmeye çalışır.' },
+          { period: '3-6 ay', text: 'Ya adapte olmuşsundur ya da eski düzene geri dönmüşsündür. Arada yoktur.' },
+        ],
+        risk: 'Hazırlıksız hareket, pişmanlığa dönüşebilir.',
+        gain: 'Erteleme döngüsünü kırarsın. Karar kasın güçlenir.',
+      },
+      {
+        title: 'Kontrollü ilerlersen',
+        timeline: [
+          { period: 'İlk 7 gün', text: 'Küçük adımlar atarsın. Araştırma, konuşma, gözlem.' },
+          { period: '1-2 ay', text: 'Netleşme başlar. Ama "biraz daha bekleyeyim" tuzağı kapıda.' },
+          { period: '3-6 ay', text: 'Ya somut bir geçiş planın vardır ya da kontrollü ilerleme ertelemeye dönmüştür.' },
+        ],
+        risk: 'Kontrol, kaçınmanın kibar hali olabilir.',
+        gain: 'Bilinçli bir geçiş yaparsın, sürprizleri azaltırsın.',
+      },
+      {
+        title: 'Ertelersen',
+        timeline: [
+          { period: 'İlk 7 gün', text: 'Geçici rahatlama. "Doğru zamanı bekleyeyim" diye ikna edersin kendini.' },
+          { period: '1-2 ay', text: 'Aynı düşünceler dönmeye devam eder. Enerji düşer.' },
+          { period: '3-6 ay', text: 'Ya karar seni bulur (kriz olarak) ya da alışırsın mutsuzluğa.' },
+        ],
+        risk: 'Erteleme kalıcılaşır. Karar alma kapasiten zayıflar.',
+        gain: 'Stabilite korunur. Ama bedeli gizli kalır.',
+      },
+    ];
+  }
+  if (mode === 'love') {
+    return [
+      {
+        title: 'Yüzleşirsen',
+        timeline: [
+          { period: 'İlk 7 gün', text: 'Konuşmanın getirdiği rahatlama veya sancı. Her iki durumda da netlik.' },
+          { period: '1-2 ay', text: 'Ya yeni bir denge kurulur ya da ayrılık netleşir.' },
+          { period: '3-6 ay', text: 'Hangisi olduysa, artık o belirsizlik yok.' },
+        ],
+        risk: 'Yüzleşme acı getirebilir.',
+        gain: 'Belirsizliğin yerini netlik alır.',
+      },
+      {
+        title: 'Sınır koyarsan',
+        timeline: [
+          { period: 'İlk 7 gün', text: 'İhtiyaçlarını dile getirmek zor ama özgürleştirici.' },
+          { period: '1-2 ay', text: 'Karşı tarafın tepkisi gerçeği gösterir.' },
+          { period: '3-6 ay', text: 'Ya ilişki dönüşür ya da gerçek kapasitesi ortaya çıkar.' },
+        ],
+        risk: 'Sınır koymak ilişkiyi sarsabilir.',
+        gain: 'Kendine saygın artar. Doğru ilişki buna dayanır.',
+      },
+      {
+        title: 'Beklemen durumunda',
+        timeline: [
+          { period: 'İlk 7 gün', text: '"Belki düzelir" umudu. Geçici huzur.' },
+          { period: '1-2 ay', text: 'Aynı kalıp tekrarlar. Enerji aşınır.' },
+          { period: '3-6 ay', text: 'Ya tolerans artar (sağlıksız) ya da kriz noktası gelir.' },
+        ],
+        risk: 'Kendin olmaktan uzaklaşırsın.',
+        gain: 'Stabilite devam eder. Ama hangi bedelle?',
+      },
+    ];
+  }
+  // life (default)
+  return [
+    {
+      title: 'Değişimi başlatırsan',
+      timeline: [
+        { period: 'İlk 7 gün', text: 'İlk adımın verdiği enerji. Ama korku hemen arkadan gelir.' },
+        { period: '1-2 ay', text: 'Eski düzen çekmeye çalışır. Disiplin test edilir.' },
+        { period: '3-6 ay', text: 'Ya yeni bir normal kurmuşsundur ya da eski kalıba geri dönmüşsündür.' },
+      ],
+      risk: 'Hazırlıksız değişim tükenmişliğe yol açabilir.',
+      gain: 'Atalet kırılır. Kendine güvenin artar.',
+    },
+    {
+      title: 'Adım adım gidersen',
+      timeline: [
+        { period: 'İlk 7 gün', text: 'Küçük ama somut değişiklikler. Günlük rutinde bir şeyi değiştir.' },
+        { period: '1-2 ay', text: 'Küçük kazanımlar birikir. Ama sabırsızlık kapıda.' },
+        { period: '3-6 ay', text: 'Kümülatif etki görünür hale gelir.' },
+      ],
+      risk: '"Adım adım" ertelemenin maskesi olabilir.',
+      gain: 'Sürdürülebilir dönüşüm. Daha az sarsıntı.',
+    },
+    {
+      title: 'Hiçbir şey yapmazsan',
+      timeline: [
+        { period: 'İlk 7 gün', text: 'Karar vermemenin verdiği sahte huzur.' },
+        { period: '1-2 ay', text: 'İçsel huzursuzluk büyür ama dışarıdan görünmez.' },
+        { period: '3-6 ay', text: 'Ya kriz tetikler zorla değişimi ya da kabulleniş derinleşir.' },
+      ],
+      risk: 'Hayat senin yerine karar verir. Ve genellikle acıyla.',
+      gain: 'Mevcut düzen korunur. Ama soru hep orada kalır.',
+    },
+  ];
 }
 
 export default function DnaResultPage() {
@@ -78,7 +237,9 @@ export default function DnaResultPage() {
   const [aiResult, setAiResult] = useState<AIAnalysis | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(false);
-  const [activeScenario, setActiveScenario] = useState<'A' | 'B' | 'C'>('A');
+  const [activeScenario, setActiveScenario] = useState(0);
+  const [phase, setPhase] = useState<Phase>('insight');
+  const [dnaOpen, setDnaOpen] = useState(false);
 
   const mode = ((typeof window !== 'undefined'
     ? localStorage.getItem('piri_mode')
@@ -141,13 +302,19 @@ export default function DnaResultPage() {
     setScores(newScores);
     setShadow(newShadow);
     setTextAnswers(texts);
+
+    // Profili güncelle — tüm veriler merkezi profile'a kaydedilir
+    updateProfile({
+      scores: newScores,
+      shadow: newShadow,
+      textAnswers: texts,
+    });
   }, [mode]);
 
   // Call AI once scores are ready
   useEffect(() => {
     if (!scores || !shadow) return;
 
-    // Check if we already have cached result
     const cached = localStorage.getItem(`piri_ai_${mode}`);
     if (cached) {
       try {
@@ -162,14 +329,7 @@ export default function DnaResultPage() {
     fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mode,
-        sub,
-        scores,
-        shadow,
-        textAnswers,
-        lang: 'tr',
-      }),
+      body: JSON.stringify({ mode, sub, scores, shadow, textAnswers, lang: 'tr' }),
     })
       .then((r) => {
         if (!r.ok) throw new Error('API error');
@@ -178,6 +338,16 @@ export default function DnaResultPage() {
       .then((data: AIAnalysis) => {
         setAiResult(data);
         localStorage.setItem(`piri_ai_${mode}`, JSON.stringify(data));
+        // AI analizini profile'a kaydet
+        if (data.analysis) {
+          updateProfile({
+            aiAnalysis: {
+              headline: data.analysis.headline || '',
+              corePattern: data.analysis.corePattern || '',
+              blindSpot: data.analysis.blindSpot || '',
+            },
+          });
+        }
       })
       .catch(() => setAiError(true))
       .finally(() => setAiLoading(false));
@@ -209,121 +379,101 @@ export default function DnaResultPage() {
     { key: 'attachment', label: 'Bağlanma', value: scores.attachment },
   ] as const;
 
-  const modeTitle = mode === 'work' ? 'İş' : mode === 'life' ? 'Yol' : 'Aşk';
   const ai = aiResult;
-  const scenarios = ai ? [
-    { key: 'A' as const, data: ai.simulation.scenarioA },
-    { key: 'B' as const, data: ai.simulation.scenarioB },
-    { key: 'C' as const, data: ai.simulation.scenarioC },
-  ] : [];
+  const scenarios = ai
+    ? [ai.simulation.scenarioA, ai.simulation.scenarioB, ai.simulation.scenarioC]
+    : getHardcodedScenarios(mode);
 
-  const activeData = scenarios.find(s => s.key === activeScenario)?.data;
+  const activeData = scenarios[activeScenario];
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex items-start justify-center p-6">
       <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
 
-      <div className="relative w-full max-w-3xl space-y-8 py-12">
+      <div className="relative w-full max-w-2xl space-y-8 py-10">
 
-        {/* ── Header ── */}
-        <div className="text-center space-y-3">
-          <div className="text-sm text-slate-500 tracking-wide">{modeTitle} · Karar İmzası</div>
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
-            {ai ? ai.analysis.headline : 'Karar Haritan'}
-          </h1>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            {ai ? '' : fallbackComment(topSignals)}
-          </p>
-        </div>
-
-        {/* ── AI Loading ── */}
-        {aiLoading && (
-          <div className="text-center space-y-4 py-8">
-            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/55 border border-white/60 backdrop-blur-xl">
-              <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-slate-900 animate-spin" />
-              <span className="text-slate-700">Piri analiz ediyor...</span>
-            </div>
+        {/* ── Faz 1: Kısa Insight ── */}
+        <div className="text-center space-y-5 animate-fadeUp">
+          {/* Small orb */}
+          <div className="flex justify-center">
+            <PiriOrb size={80} />
           </div>
-        )}
 
-        {/* ── AI Analysis ── */}
-        {ai && (
-          <div className="card space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white via-[rgba(210,230,255,0.9)] to-[rgba(165,200,255,0.4)] border border-white/80 shadow-sm flex-shrink-0" />
-              <div>
-                <p className="text-xs tracking-widest text-slate-400 uppercase">Piri</p>
-                {ai.analysis.corePattern && (
-                  <p className="text-sm font-medium text-slate-700">{ai.analysis.corePattern}</p>
-                )}
-              </div>
-            </div>
-            {ai.analysis.paragraphs.map((p, i) => (
-              <p key={i} className="text-slate-700 leading-relaxed">{p}</p>
+          <p className="text-[13px] tracking-[0.25em] text-slate-400 uppercase">Piri</p>
+
+          {/* Top 2 signals */}
+          <div className="flex items-center justify-center gap-3">
+            {topSignals.slice(0, 2).map((s) => (
+              <span key={s.key} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 border border-white/70 text-sm text-slate-700 backdrop-blur-sm">
+                <span>{signalEmoji(s.key)}</span>
+                <span>{signalLabel(s.key)}</span>
+                <span className="text-slate-400 text-xs">{s.value}</span>
+              </span>
             ))}
-            {ai.analysis.blindSpot && (
-              <div className="rounded-2xl bg-slate-900/[0.03] border border-slate-900/[0.06] p-5">
-                <p className="text-xs tracking-widest text-slate-400 uppercase mb-2">Kör Nokta</p>
-                <p className="text-slate-800 font-medium">{ai.analysis.blindSpot}</p>
+          </div>
+
+          {/* Main insight comment */}
+          <div className="max-w-lg mx-auto">
+            {ai ? (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold text-slate-900">{ai.analysis.headline}</h2>
+                {ai.analysis.paragraphs.slice(0, 1).map((p, i) => (
+                  <p key={i} className="text-slate-600 leading-relaxed">{p}</p>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xl text-slate-900 leading-relaxed font-medium">
+                  Seni tanımaya başladım.
+                </p>
+                <p className="text-slate-600 leading-relaxed">
+                  {fallbackComment(topSignals)}
+                </p>
+                <p className="text-slate-500 text-sm mt-2">
+                  Ama bu sadece yüzey.
+                </p>
               </div>
             )}
           </div>
-        )}
 
-        {/* ── DNA Scores ── */}
-        <div className="card space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-xs tracking-widest text-slate-400 uppercase">Karar DNA</p>
-            <p className="text-sm tracking-widest text-slate-600 font-mono">{dnaCode(scores)}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-5">
-            {rows.map((item) => (
-              <div key={item.key} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-700">{item.label}</span>
-                  <span className="text-sm font-medium text-slate-900">{item.value}</span>
-                </div>
-                <div className="w-full h-[5px] bg-slate-900/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-slate-900 rounded-full transition-all duration-700"
-                    style={{ width: `${item.value}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <p className="text-xs tracking-widest text-slate-400 uppercase">Baskın Blokaj Sinyalleri</p>
-            <div className="flex flex-wrap gap-2">
-              {topSignals.map((s) => (
-                <span key={s.key} className="tag">
-                  {signalLabel(s.key)} <span className="text-slate-400 ml-1">{s.value}</span>
-                </span>
-              ))}
+          {/* AI loading indicator */}
+          {aiLoading && (
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/55 border border-white/60 backdrop-blur-xl">
+              <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-slate-900 animate-spin" />
+              <span className="text-sm text-slate-600">Piri derinlemesine analiz ediyor...</span>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* ── Simulation (AI) ── */}
-        {ai && (
-          <div className="card space-y-6">
+        {/* ── Faz 2: Simülasyon ── */}
+        {phase === 'insight' && (
+          <div className="text-center animate-fadeUp">
+            <button
+              onClick={() => setPhase('simulation')}
+              className="px-8 py-4 rounded-2xl bg-white/60 border border-white/70 text-slate-800 font-medium backdrop-blur-sm transition-all hover:bg-white/80 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+            >
+              Şimdi sana olası senaryoları göstereyim →
+            </button>
+          </div>
+        )}
+
+        {(phase === 'simulation' || phase === 'dialog') && (
+          <div className="card space-y-6 animate-fadeUp">
             <p className="text-xs tracking-widest text-slate-400 uppercase">Simülasyon</p>
 
             {/* Scenario tabs */}
             <div className="flex gap-2">
-              {scenarios.map((s) => (
+              {scenarios.map((s, i) => (
                 <button
-                  key={s.key}
-                  onClick={() => setActiveScenario(s.key)}
+                  key={i}
+                  onClick={() => setActiveScenario(i)}
                   className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${
-                    activeScenario === s.key
+                    activeScenario === i
                       ? 'bg-slate-900 text-white shadow-sm'
                       : 'bg-white/60 text-slate-600 hover:bg-white/80'
                   }`}
                 >
-                  {s.data.title}
+                  {s.title}
                 </button>
               ))}
             </div>
@@ -358,82 +508,156 @@ export default function DnaResultPage() {
                 </div>
               </div>
             )}
+
+            {/* Transition to dialog */}
+            {phase === 'simulation' && (
+              <div className="text-center pt-2">
+                <button
+                  onClick={() => setPhase('dialog')}
+                  className="text-sm text-slate-500 hover:text-slate-700 transition-colors underline underline-offset-4"
+                >
+                  Devam et →
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ── Action Steps (AI) ── */}
-        {ai && (
-          <div className="card space-y-5">
-            <p className="text-xs tracking-widest text-slate-400 uppercase">Şimdi Ne Yapabilirsin</p>
-
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-medium flex-shrink-0">1</div>
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">Bugün</p>
-                  <p className="text-slate-800">{ai.action.today}</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-medium flex-shrink-0">2</div>
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">Bu hafta</p>
-                  <p className="text-slate-800">{ai.action.thisWeek}</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-900 flex items-center justify-center text-xs flex-shrink-0">?</div>
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">Kendine sor</p>
-                  <p className="text-slate-800 italic">{ai.action.question}</p>
-                </div>
+        {/* ── AI detailed analysis (only if AI available) ── */}
+        {ai && (phase === 'simulation' || phase === 'dialog') && (
+          <div className="card space-y-5 animate-fadeUp">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white via-[rgba(210,230,255,0.9)] to-[rgba(165,200,255,0.4)] border border-white/80 shadow-sm flex-shrink-0" />
+              <div>
+                <p className="text-xs tracking-widest text-slate-400 uppercase">Piri Analizi</p>
+                {ai.analysis.corePattern && (
+                  <p className="text-sm font-medium text-slate-700">{ai.analysis.corePattern}</p>
+                )}
               </div>
             </div>
+            {ai.analysis.paragraphs.slice(1).map((p, i) => (
+              <p key={i} className="text-slate-700 leading-relaxed text-sm">{p}</p>
+            ))}
+            {ai.analysis.blindSpot && (
+              <div className="rounded-2xl bg-slate-900/[0.03] border border-slate-900/[0.06] p-4">
+                <p className="text-xs tracking-widest text-slate-400 uppercase mb-1.5">Kör Nokta</p>
+                <p className="text-slate-800 text-sm font-medium">{ai.analysis.blindSpot}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ── Text Answers ── */}
-        {textAnswers.length > 0 && !ai && (
-          <div className="card space-y-3">
-            <p className="text-xs tracking-widest text-slate-400 uppercase">Senin Sözlerin</p>
-            <div className="grid gap-3">
-              {textAnswers.slice(0, 3).map((t, i) => (
-                <div key={i} className="rounded-2xl bg-white/65 border border-white/70 p-4 text-sm text-slate-700">
-                  &ldquo;{t}&rdquo;
-                </div>
-              ))}
+        {/* ── Faz 3: Piri ile Diyalog Daveti ── */}
+        {phase === 'dialog' && (
+          <div className="text-center space-y-6 animate-fadeUp py-4">
+            <div className="max-w-md mx-auto space-y-3">
+              <p className="text-lg text-slate-800 leading-relaxed">
+                Seni tanımaya devam edeceğim.
+              </p>
+              <p className="text-slate-600 leading-relaxed">
+                Peki sen ne yapmak istiyorsun? Hangi konuda karar almak istiyor ama uygulayamıyorsun?
+              </p>
+              <p className="text-slate-500 text-sm italic">
+                Anlat. Sorunlarını birlikte çözelim.
+              </p>
             </div>
+
+            <button
+              onClick={() => router.push('/chat')}
+              className="px-10 py-4 rounded-2xl bg-slate-900 text-white font-medium text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-900/20"
+            >
+              Piri ile Konuş
+            </button>
           </div>
         )}
+
+        {/* ── DNA Skorları (katlanabilir) ── */}
+        <div className="animate-fadeUp">
+          <button
+            onClick={() => setDnaOpen(!dnaOpen)}
+            className="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-sm text-sm text-slate-500 hover:bg-white/60 transition-all"
+          >
+            <span className="flex items-center gap-2">
+              <span className="tracking-widest uppercase text-xs">Karar DNA</span>
+              <span className="font-mono text-xs text-slate-400">{dnaCode(scores)}</span>
+            </span>
+            <span className="text-xs">{dnaOpen ? '▲' : '▼'}</span>
+          </button>
+
+          {dnaOpen && (
+            <div className="mt-3 card space-y-5 animate-fadeUp">
+              <div className="grid grid-cols-2 gap-4">
+                {rows.map((item) => (
+                  <div key={item.key} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-slate-600">{item.label}</span>
+                      <span className="text-xs font-medium text-slate-900">{item.value}</span>
+                    </div>
+                    <div className="w-full h-[4px] bg-slate-900/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-slate-900 rounded-full transition-all duration-700"
+                        style={{ width: `${item.value}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <p className="text-xs tracking-widest text-slate-400 uppercase">Blokaj Sinyalleri</p>
+                <div className="flex flex-wrap gap-2">
+                  {topSignals.map((s) => (
+                    <span key={s.key} className="tag text-xs">
+                      {signalEmoji(s.key)} {signalLabel(s.key)} <span className="text-slate-400 ml-1">{s.value}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text answers */}
+              {textAnswers.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs tracking-widest text-slate-400 uppercase">Senin Sözlerin</p>
+                  <div className="grid gap-2">
+                    {textAnswers.slice(0, 3).map((t, i) => (
+                      <div key={i} className="rounded-xl bg-white/50 border border-white/60 p-3 text-xs text-slate-600">
+                        &ldquo;{t}&rdquo;
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* ── AI Error fallback ── */}
         {aiError && (
-          <div className="text-center text-sm text-slate-500">
+          <div className="text-center text-sm text-slate-400">
             Piri şu an derinlemesine analiz yapamıyor. Temel haritanı yukarıda görebilirsin.
           </div>
         )}
 
         {/* ── Footer actions ── */}
-        <div className="text-center space-y-4 pt-4">
+        <div className="text-center space-y-3 pt-2">
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <button
-              onClick={() => {
-                // Clear AI cache to get fresh analysis
-                localStorage.removeItem(`piri_ai_${mode}`);
-                window.location.reload();
-              }}
-              className="px-6 py-3 rounded-xl bg-slate-900 text-white font-medium transition hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Yeniden Analiz Et
-            </button>
-            <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 rounded-xl bg-white/70 text-slate-900 border border-white/70 font-medium transition hover:scale-[1.02] active:scale-[0.98]"
+              className="px-5 py-2.5 rounded-xl bg-white/60 text-slate-600 border border-white/60 text-sm font-medium transition hover:scale-[1.02] active:scale-[0.98]"
             >
               Başka Kapı Aç
             </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem(`piri_ai_${mode}`);
+                window.location.reload();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-white/60 text-slate-600 border border-white/60 text-sm font-medium transition hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Yeniden Analiz Et
+            </button>
           </div>
-          <p className="text-sm text-slate-400">
+          <p className="text-xs text-slate-400">
             Bu bir tavsiye değil. Karar haritası bir ayna — gördüğün şey senindir.
           </p>
         </div>
@@ -443,8 +667,8 @@ export default function DnaResultPage() {
         .card {
           background: rgba(255,255,255,0.55);
           border: 1px solid rgba(255,255,255,0.60);
-          border-radius: 28px;
-          padding: 28px;
+          border-radius: 24px;
+          padding: 24px;
           box-shadow: 0 2px 8px rgba(15,23,42,0.03);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
@@ -453,18 +677,18 @@ export default function DnaResultPage() {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          padding: 8px 16px;
+          padding: 6px 12px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.70);
+          background: rgba(255,255,255,0.65);
           border: 1px solid rgba(255,255,255,0.70);
-          font-size: 14px;
+          font-size: 13px;
           color: #1e293b;
         }
         .animate-fadeUp {
-          animation: fadeUp 0.4s ease both;
+          animation: fadeUp 0.5s ease both;
         }
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
