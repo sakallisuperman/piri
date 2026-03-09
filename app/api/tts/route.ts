@@ -36,7 +36,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('TTS error:', errText);
+      console.error('TTS error:', response.status, errText);
+      if (response.status === 429) {
+        return NextResponse.json({ error: 'Rate limit — ses geçici olarak devre dışı' }, { status: 429 });
+      }
       return NextResponse.json({ error: 'TTS service error' }, { status: 502 });
     }
 

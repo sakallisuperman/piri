@@ -36,7 +36,11 @@ export function usePiriVoice() {
           body: JSON.stringify({ text: item.text }),
         });
 
-        if (!res.ok) throw new Error('TTS failed');
+        if (!res.ok) {
+          console.warn('TTS unavailable:', res.status);
+          // Skip this voice line gracefully — don't block UI
+          return;
+        }
 
         const blob = await res.blob();
         url = URL.createObjectURL(blob);
