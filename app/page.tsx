@@ -427,12 +427,12 @@ export default function Home() {
         .gender-btn:active { transform: scale(0.97); }
 
         .gender-female {
-          background: linear-gradient(135deg, rgba(245,230,225,0.9), rgba(235,215,210,0.85), rgba(225,200,195,0.8));
-          color: #8b6f66;
+          background: linear-gradient(135deg, rgba(160,120,255,0.45), rgba(140,100,255,0.45), rgba(180,140,255,0.45));
+          color: #7c5cc7;
         }
         .gender-male {
-          background: linear-gradient(135deg, rgba(230,232,236,0.9), rgba(215,218,224,0.85), rgba(200,204,212,0.8));
-          color: #5a6170;
+          background: linear-gradient(135deg, rgba(100,180,255,0.45), rgba(80,200,255,0.45), rgba(120,200,255,0.45));
+          color: #3b8fd4;
         }
 
         /* Age/profile buttons */
