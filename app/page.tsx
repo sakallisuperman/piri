@@ -427,11 +427,11 @@ export default function Home() {
         .gender-btn:active { transform: scale(0.97); }
 
         .gender-female {
-          background: linear-gradient(135deg, rgba(160,120,255,0.45), rgba(140,100,255,0.45), rgba(180,140,255,0.45));
+          background: linear-gradient(135deg, rgba(160,120,255,0.20), rgba(140,100,255,0.20), rgba(180,140,255,0.20));
           color: #7c5cc7;
         }
         .gender-male {
-          background: linear-gradient(135deg, rgba(100,180,255,0.45), rgba(80,200,255,0.45), rgba(120,200,255,0.45));
+          background: linear-gradient(135deg, rgba(100,180,255,0.20), rgba(80,200,255,0.20), rgba(120,200,255,0.20));
           color: #3b8fd4;
         }
 
