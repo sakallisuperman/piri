@@ -1,5 +1,5 @@
 'use client';
-
+import { saveConversation } from "@/lib/saveConversation"
 import { useEffect, useRef, useState } from 'react';
 import PiriOrb from '../components/PiriOrb';
 import { loadProfile } from '../lib/profile';
@@ -192,7 +192,7 @@ export default function ChatPage() {
       }));
 
       const profile = getProfileForApi();
-
+await saveConversation("user123", "user", message);
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -208,7 +208,7 @@ export default function ChatPage() {
         const data = await res.json();
         assistantContent = data.reply;
       }
-
+await saveConversation("user123", "piri", assistantContent);
       const assistantMsg: Message = {
         id: generateId(),
         role: 'assistant',
