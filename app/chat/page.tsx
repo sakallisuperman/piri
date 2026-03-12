@@ -91,12 +91,6 @@ export default function ChatPage() {
   }, [threads, activeThreadId]);
 
   const activeThread = threads.find(t => t.id === activeThreadId);
-<<<<<<< HEAD
-=======
-  const lastAssistantMessage = activeThread?.messages
-    ?.filter(m => m.role === 'assistant')
-    .slice(-1)[0];
->>>>>>> b39feaf (connect project to github)
 
   function createThread() {
     const newThread: Thread = {
@@ -170,12 +164,12 @@ export default function ChatPage() {
     if (apiAvailable === false) {
       // Show offline message
       const offlineMsg: Message = {
-        id: generateId(),
-        role: 'assistant',
-        content: 'Ben buradayım.
+      id: generateId(),
+      role: 'assistant',
+      content: `Ben buradayım.
 
-Ne hakkında konuşmak istiyorsun? seni tanımaya devam ediyorum.',
-        timestamp: Date.now(),
+Ne hakkında konuşmak istiyorsun? Seni tanımaya devam ediyorum.`,
+      timestamp: Date.now(),
       };
 
       const updatedThreads = currentThreads.map(t => {
@@ -361,7 +355,6 @@ await saveConversation("user123", "piri", assistantContent);
               </div>
             </div>
           ) : (
-<<<<<<< HEAD
             activeThread.messages.map((msg) => (
               <div
                 key={msg.id}
@@ -378,37 +371,6 @@ await saveConversation("user123", "piri", assistantContent);
                 </div>
               </div>
             ))
-=======
-            <div className="flex flex-col items-center h-full text-center space-y-6">
-              <div className="flex flex-col items-center space-y-3">
-                <PiriOrb size={60} />
-                {lastAssistantMessage && (
-                  <p className="max-w-xl text-base md:text-lg text-slate-700 leading-relaxed transition-opacity duration-500 ease-out">
-                    {lastAssistantMessage.content}
-                  </p>
-                )}
-              </div>
-
-              <div className="w-full space-y-4">
-                {activeThread.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] md:max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                        msg.role === 'user'
-                          ? 'bg-slate-900 text-white rounded-br-md'
-                          : 'bg-white/70 text-slate-800 border border-white/70 backdrop-blur-sm rounded-bl-md'
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
->>>>>>> b39feaf (connect project to github)
           )}
 
           {loading && (
