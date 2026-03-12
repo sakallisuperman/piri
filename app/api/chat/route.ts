@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'API yapılandırılmamış', fallback: 'Piri şu an aktif değil. Kredi yüklenince seninle konuşabileceğim.' },
+        { error: 'API yapılandırılmamış', fallback: `Ben buradayım.\n\nNe hakkında konuşmak istiyorsun? Seni tanımaya devam ediyorum.` },
         { status: 503 }
       );
     }

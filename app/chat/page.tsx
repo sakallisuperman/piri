@@ -56,6 +56,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [apiAvailable, setApiAvailable] = useState<boolean | null>(null);
+  const [offlineIntroShown, setOfflineIntroShown] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -162,25 +163,27 @@ export default function ChatPage() {
     saveThreads(currentThreads);
 
     if (apiAvailable === false) {
-      // Show offline message
-      const offlineMsg: Message = {
-      id: generateId(),
-      role: 'assistant',
-      content: `Ben buradayım.
+      if (!offlineIntroShown) {
+        const offlineMsg: Message = {
+          id: generateId(),
+          role: 'assistant',
+          content: `Ben buradayım.
 
 Ne hakkında konuşmak istiyorsun? Seni tanımaya devam ediyorum.`,
-      timestamp: Date.now(),
-      };
+          timestamp: Date.now(),
+        };
 
-      const updatedThreads = currentThreads.map(t => {
-        if (t.id === threadId) {
-          return { ...t, messages: [...t.messages, offlineMsg] };
-        }
-        return t;
-      });
+        const updatedThreads = currentThreads.map(t => {
+          if (t.id === threadId) {
+            return { ...t, messages: [...t.messages, offlineMsg] };
+          }
+          return t;
+        });
 
-      setThreads(updatedThreads);
-      saveThreads(updatedThreads);
+        setThreads(updatedThreads);
+        saveThreads(updatedThreads);
+        setOfflineIntroShown(true);
+      }
       return;
     }
 
@@ -347,11 +350,6 @@ await saveConversation("user123", "piri", assistantContent);
                 <p className="text-sm text-slate-500">
                   Karar alma kalıplarını konuşalım. Ne düşünüyorsun?
                 </p>
-                {apiAvailable === false && (
-                  <div className="mt-4 px-4 py-3 rounded-xl bg-amber-50/80 border border-amber-200/60 text-sm text-amber-700">
-                    Piri&apos;nin sohbet özelliği şu an aktif değil. Kredi yüklenince tam kapasiteyle çalışacak.
-                  </div>
-                )}
               </div>
             </div>
           ) : (
