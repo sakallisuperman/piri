@@ -166,7 +166,9 @@ export default function ChatPage() {
       const offlineMsg: Message = {
         id: generateId(),
         role: 'assistant',
-        content: 'Şu an Piri\'nin derin analiz özelliği aktif değil. Kredi yüklenince seninle konuşabileceğim. Ama merak etme — seni tanımaya devam ediyorum.',
+        content: 'Ben buradayım.
+
+Ne hakkında konuşmak istiyorsun? seni tanımaya devam ediyorum.',
         timestamp: Date.now(),
       };
 
