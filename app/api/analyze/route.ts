@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as AnalyzeRequest;
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: 'API key not configured' },
@@ -148,27 +148,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-4o',
-        temperature: 0.7,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: buildSystemPrompt() },
-          { role: 'user', content: buildUserPrompt(body) },
-        ],
-      }),
-    });
+    const systemPrompt = buildSystemPrompt();
+    const userPrompt = buildUserPrompt(body);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('OpenAI error:', errText);
+      console.error('Gemini error:', errText);
       return NextResponse.json(
         { error: 'AI service error' },
         { status: 502 }
@@ -176,7 +177,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!content) {
       return NextResponse.json(
