@@ -1,51 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// ───────────────────────────────────────────────
-// POST /api/chat
-// Prototype Piri — simulated local responses
-// ───────────────────────────────────────────────
-
-const REFLECTIVE_QUESTIONS = [
-  'Ne zamandır böyle hissediyorsun?',
-  'Seni en çok zorlayan kısım ne?',
-  'Bu düşünce ilk ne zaman ortaya çıktı?',
-  'Bunun senin için en riskli tarafı ne?',
-];
-
 type ChatRequest = {
   message: string;
+  history?: { role: 'user' | 'model'; text: string }[];
+  mode?: string;
 };
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as Partial<ChatRequest> | null;
     const message = body?.message ?? '';
+    const history = body?.history ?? [];
+    const mode = body?.mode ?? 'general';
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
 
-    const randomIndex = Math.floor(Math.random() * REFLECTIVE_QUESTIONS.length);
-    const reply = REFLECTIVE_QUESTIONS[randomIndex] ?? REFLECTIVE_QUESTIONS[0];
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    }
 
-    return NextResponse.json(
+    const systemPrompt = `Sen Piri'sin — bir karar simülasyon asistanı. Kullanıcının kararlarını analiz ediyorsun. Tavsiye vermiyorsun, onun yerine düşünmesini sağlıyorsun. Kısa, derin ve yansıtıcı sorular soruyorsun. Türkçe konuşuyorsun. Karar alanı: ${mode}. Terapist gibi değil, bilge bir ayna gibi davran.`;
+
+    const contents = [
+      ...history.map((h) => ({ role: h.role, parts: [{ text: h.text }] })),
+      { role: 'user', parts: [{ text: message }] },
+    ];
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
-        reply,
-        debug: {
-          receivedMessageEmpty: !message,
-          prototype: true,
-        },
-      },
-      { status: 200 },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: { temperature: 0.8, maxOutputTokens: 500 },
+        }),
+      }
     );
+
+      const errText = await response.text();
+      console.error('Gemini error:', errText);
+      return NextResponse.json({ error: 'AI service error' }, { status: 502 });
+    }
+
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'Bir şeyler ters gitti.';
+    return NextResponse.json({ reply });
   } catch (err) {
-    console.error('Chat prototype error:', err);
-
-    return NextResponse.json(
-      {
-        reply: 'Şu an teknik bir aksaklık var ama seni duyuyorum. İçinden geçenleri bir cümleyle tekrar yazar mısın?',
-        debug: {
-          error: true,
-          prototype: true,
-        },
-      },
-      { status: 200 },
-    );
+    console.error('Chat error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
