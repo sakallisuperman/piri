@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 type ChatRequest = {
   message: string;
-  history?: { role: "user" | "assistant"; text: string }[];
+  history?: { role: string; content?: string; text?: string }[];
   mode?: string;
 };
 
@@ -18,15 +18,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
-    const systemPrompt = "Sen Piri adinda bir karar simulasyon asistanisin. " +
-      "Kullanicinin kararlarini analiz ediyorsun. Tavsiye vermiyorsun, " +
-      "onun yerine dusunmesini sagliyorsun. Kisa, derin ve yansitici sorular soruyorsun. " +
-      "Turkce konusuyorsun. Karar alani: " + mode + ". " +
-      "Terapist gibi degil, bilge bir ayna gibi davran.";
+    const systemPrompt = `Sen Piri'sin. Bir karar terapisti gibi davraniyorsun.
+
+Kurallarin:
+- Kisa konус. Maksimum 2 cumle.
+- Soru sor ama sadece bir soru. Asla iki soru sorma.
+- Bot gibi davranma. Insan gibi, sicak ama sakin konус.
+- Kullaniciya hemen karar analizi yapma. Once onu dinle, anla.
+- Motivasyon cumlesi kurma. "Harika!", "Tabii ki!" gibi yapay ifadeler kullanma.
+- Kullanici ne hissettiriyorsa ona odaklan. Duygusunu yansit.
+- Sessizligi koru. Az soyle, derin soyle.
+- Karar alani: ${mode}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...history.map((h: {role: string, content?: string, text?: string}) => ({ role: h.role, content: h.content || h.text || "" })),
+      ...history.map((h) => ({
+        role: h.role === "assistant" ? "assistant" : "user",
+        content: h.content || h.text || "",
+      })),
       { role: "user", content: message },
     ];
 
@@ -39,8 +48,9 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages,
-        temperature: 0.8,
-        max_tokens: 500,
+        temperature: 0.75,
+        max_tokens: 120,
+        stream: true,
       }),
     });
 
@@ -50,9 +60,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI service error" }, { status: 502 });
     }
 
-    const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content ?? "Bir seyler ters gitti.";
-    return NextResponse.json({ reply });
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body?.getReader();
+        if (!reader) { controller.close(); return; }
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+          for (const line of lines) {
+            const data = line.replace("data: ", "").trim();
+            if (data === "[DONE]") { controller.close(); return; }
+            try {
+              const parsed = JSON.parse(data);
+              const token = parsed.choices?.[0]?.delta?.content;
+              if (token) controller.enqueue(encoder.encode(token));
+            } catch {}
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (err) {
     console.error("Chat error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });

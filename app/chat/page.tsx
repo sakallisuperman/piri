@@ -204,16 +204,50 @@ await saveConversation("user123", "user", message);
         body: JSON.stringify({ message, history, profile }),
       });
 
-      let assistantContent: string;
+      const streamingId = generateId();
+      setThreads(prev => {
+        const updated = prev.map(t => {
+          if (t.id === threadId) return { ...t, messages: [...t.messages, { id: streamingId, role: 'assistant' as const, content: '', timestamp: Date.now() }] };
+          return t;
+        });
+        saveThreads(updated);
+        return updated;
+      });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        assistantContent = errData.fallback || 'Bir hata oluştu. Biraz sonra tekrar dene.';
+      let assistantContent = '';
+      if (!res.ok || !res.body) {
+        assistantContent = 'Bir hata olustu. Biraz sonra tekrar dene.';
+        setThreads(prev => {
+          const updated = prev.map(t => {
+            if (t.id !== threadId) return t;
+            return { ...t, messages: t.messages.map(m => m.id === streamingId ? { ...m, content: assistantContent } : m) };
+          });
+          saveThreads(updated);
+          return updated;
+        });
       } else {
-        const data = await res.json();
-        assistantContent = data.reply;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const token = decoder.decode(value);
+          assistantContent += token;
+          setThreads(prev => prev.map(t => {
+            if (t.id !== threadId) return t;
+            return { ...t, messages: t.messages.map(m => m.id === streamingId ? { ...m, content: assistantContent } : m) };
+          }));
+        }
+        setThreads(prev => {
+          const updated = prev.map(t => {
+            if (t.id !== threadId) return t;
+            return { ...t, messages: t.messages.map(m => m.id === streamingId ? { ...m, content: assistantContent } : m) };
+          });
+          saveThreads(updated);
+          return updated;
+        });
       }
-await saveConversation("user123", "piri", assistantContent);
+      await saveConversation("user123", "piri", assistantContent);
       const assistantMsg: Message = {
         id: generateId(),
         role: 'assistant',
