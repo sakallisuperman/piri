@@ -69,22 +69,6 @@ export default function ChatPage() {
     }
   }, []);
 
-  // Check API availability
-  useEffect(() => {
-    fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'test', history: [], profile: null }),
-    })
-      .then(r => {
-        if (r.status === 503 || r.status === 500) {
-          setApiAvailable(false);
-        } else {
-          setApiAvailable(true);
-        }
-      })
-      .catch(() => setApiAvailable(false));
-  }, []);
 
   // Scroll to bottom on new messages
   useEffect(() => {
