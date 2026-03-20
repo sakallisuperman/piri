@@ -28,7 +28,6 @@ Konusma tarsin:
 - Bazen sessiz kalabilirsin — kisa, dusundurucu bir cumle birakip beklersin.
 - Samimi ve sicaksin. Kullanici seni bir insan gibi hisseder.
 - Asla liste yapmazsin, madde madde siramazsin.
-- Karar alani: \${mode}`;
 - Karar alani: ${mode}`;
 
     const messages = [
