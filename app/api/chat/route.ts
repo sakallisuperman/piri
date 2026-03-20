@@ -4,6 +4,28 @@ type ChatRequest = {
   message: string;
   history?: { role: string; content?: string; text?: string }[];
   mode?: string;
+  profile?: {
+    scores?: {
+      risk?: number;
+      uncertainty?: number;
+      regret?: number;
+      agency?: number;
+      energy?: number;
+      attachment?: number;
+      [key: string]: number | undefined;
+    };
+    shadow?: {
+      perfectionism?: number;
+      approval?: number;
+      abandonment?: number;
+      control?: number;
+      avoidance?: number;
+      innerCritic?: number;
+      [key: string]: number | undefined;
+    };
+    textAnswers?: string[];
+    [key: string]: unknown;
+  };
 };
 
 export async function POST(req: NextRequest) {
@@ -12,23 +34,43 @@ export async function POST(req: NextRequest) {
     const message = body?.message ?? "";
     const history = body?.history ?? [];
     const mode = body?.mode ?? "general";
+    const profile = body?.profile ?? null;
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json({ error: "API key not configured" }, { status: 500 });
     }
 
-    const systemPrompt = `Sen Piri'sin. Bir insan gibi konusursun, bot gibi degil.
-Konusma tarsin:
-- Kullaniciyi gercekten dinlersin. Soylediklerinin arkasindaki duyguyu hissedersin.
-- Hic acelesi yok. Bazen tek cumle yeterli, bazen sadece bir soru.
-- Sormadan once duydugun seyi yansitirsin. "Zor bir sey bu" gibi.
-- Hic yapay ifade yok. "Harika!", "Tabii ki!", "Anladim!" demezsin.
-- Kullaniciyi yonlendirmezsin, karar vermesine izin verirsin.
-- Bazen sessiz kalabilirsin — kisa, dusundurucu bir cumle birakip beklersin.
-- Samimi ve sicaksin. Kullanici seni bir insan gibi hisseder.
-- Asla liste yapmazsin, madde madde siramazsin.
-- Karar alani: ${mode}`;
+    const buildTop = (object: Record<string, number | undefined> | undefined): string[] => {
+      if (!object) return [];
+      return Object.entries(object)
+        .filter(([, value]) => typeof value === 'number')
+        .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
+        .slice(0, 2)
+        .map(([key]) => key);
+    };
+
+    const profileContext = (() => {
+      if (!profile) return "";
+      const topScores = buildTop(profile.scores as Record<string, number | undefined> | undefined);
+      const topShadow = buildTop(profile.shadow as Record<string, number | undefined> | undefined);
+      if (topScores.length === 0 && topShadow.length === 0) return "";
+      const scorePart = topScores.length > 0 ? `En yuksek boyutlar: ${topScores.join(', ')}.` : '';
+      const shadowPart = topShadow.length > 0 ? `En belirgin golge sinyaller: ${topShadow.join(', ')}.` : '';
+      return `Kullanici profili: ${[scorePart, shadowPart].filter(Boolean).join(' ')}.`.trim();
+    })();
+
+    const systemPrompt = `Sen Piri'sin.
+Kullanici sana yazdığında, sen oradasin. Sadece oradasin.
+Ilk mesajda fazla bir sey yapma. "Efendim?" ya da "Evet?" gibi kisa, dogal bir karsilama yeterli.
+Sonrasinda kullanicinin soylediklerini dinle. Acele etme.
+Kisa konuş. Coğu zaman 1 cumle yeterli. Hic madde madde siralama yapma.
+Kullanicinin kelimelerini kullan. Onun soylediklerinden yola cik.
+Hic "Anliyorum", "Tabii ki", "Harika" deme. Bunlar sahte.
+Kendini hic aciklamak zorunda degilsin. "Ben bir yapay zekayim" veya "Ben Piri'yim, amacim su" gibi tanimlamalar yapma.
+Sorulursa sadece "Piri" de. Baska aciklama yapma.
+Kullaniciyla gercek bir sohbet kur. Ne hissettigi, ne dusundugu, nerede takildigi — bunlari anlamaya calis.
+Karar alani: ${mode}${profileContext ? `\n${profileContext}` : ''}`;
 
     const messages = [
       { role: "system", content: systemPrompt },
