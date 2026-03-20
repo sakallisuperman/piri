@@ -232,23 +232,9 @@ await saveConversation("user123", "user", message);
         });
       }
       await saveConversation("user123", "piri", assistantContent);
-      const assistantMsg: Message = {
-        id: generateId(),
-        role: 'assistant',
-        content: assistantContent,
-        timestamp: Date.now(),
-      };
-
-      setThreads(prev => {
-        const updated = prev.map(t => {
-          if (t.id === threadId) {
-            return { ...t, messages: [...t.messages, assistantMsg] };
-          }
-          return t;
-        });
-        saveThreads(updated);
-        return updated;
-      });
+      // `streamingId` ile eklenen geçici asistan mesajındaki içerik zaten güncelleniyor.
+      // Bu aşamada yeni bir asistan mesajı eklemek, tekrarlı yanıt üretir.
+      // Bu yüzden yalnızca mevcut placeholder güncellemesi yeterli.
     } catch {
       const errorMsg: Message = {
         id: generateId(),
