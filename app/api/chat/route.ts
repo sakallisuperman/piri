@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const messages = [
       { role: "system", content: systemPrompt },
-      ...history.map((h) => ({ role: h.role, content: h.text })),
+      ...history.map((h: {role: string, content?: string, text?: string}) => ({ role: h.role, content: h.content || h.text || "" })),
       { role: "user", content: message },
     ];
 
