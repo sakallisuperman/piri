@@ -64,7 +64,7 @@ const SUBS: Record<Mode, { label: string; value: string }[]> = {
   ],
 };
 
-function useTerminal(lines: { text: string; pause: number }[], active: boolean) {
+function useTerminal(lines: { text: string; pause: number }[], active: boolean, onLineComplete?: (text: string) => void) {
   const [displayed, setDisplayed] = useState<string[]>([]);
   const [current, setCurrent] = useState('');
   const [done, setDone] = useState(false);
@@ -84,13 +84,13 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean) 
         setTimeout(() => { if (!cancelled) setCurrent(line.text.slice(0, ci + 1)); }, t + ci * speed);
       });
       const end = t + chars.length * speed + 120;
-      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); setCurrent(''); } }, end);
+      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); onLineComplete?.(line.text); setCurrent(''); } }, end);
       t = end + line.pause;
     });
 
     setTimeout(() => { if (!cancelled) setDone(true); }, t + 200);
     return () => { cancelled = true; };
-  }, [active, lines]);
+  }, [active, lines, onLineComplete]);
 
   return { displayed, current, done };
 }
@@ -129,7 +129,7 @@ export default function Home() {
     }))
   );
 
-  const wake = useTerminal(WAKE_LINES, phase === 'wake');
+  const wake = useTerminal(WAKE_LINES, phase === 'wake', (text) => voiceSpeakRef.current(text));
 
   // Trigger voice only once per key (stable — no deps on voice object)
   const fireVoice = useCallback((key: string, text: string) => {
@@ -145,14 +145,8 @@ export default function Home() {
     return () => clearTimeout(t);
   }, []);
 
-  // Voice: wake line (plays alongside terminal animation)
-  useEffect(() => {
-    if (phase === 'wake') {
-      // Small delay to let text start first
-      const t = setTimeout(() => fireVoice('wake', VOICE_WAKE), 600);
-      return () => clearTimeout(t);
-    }
-  }, [phase, fireVoice]);
+  // Voice: wake line (now synced with text via useTerminal callback)
+  // Removed separate voice trigger
 
   // After wake → clean fade to white
   useEffect(() => {
@@ -192,8 +186,8 @@ export default function Home() {
   useEffect(() => {
     if (phase !== 'sub' || !mode) return;
 
-    // Voice
-    fireVoice(`door_${mode}`, VOICE_DOOR[mode]);
+    // Voice (now synced with typing)
+    // Removed separate voice trigger
 
     // Typing animation
     const lines = DOOR_LINES[mode];
@@ -206,7 +200,7 @@ export default function Home() {
         setTimeout(() => { if (!cancelled) setSubCurrent(line.slice(0, ci + 1)); }, t + ci * 30);
       });
       const end = t + chars.length * 30 + 120;
-      setTimeout(() => { if (!cancelled) { setSubText((p) => [...p, line]); setSubCurrent(''); } }, end);
+      setTimeout(() => { if (!cancelled) { setSubText((p) => [...p, line]); voiceSpeakRef.current(line); setSubCurrent(''); } }, end);
       t = end + 500;
     });
 
@@ -219,7 +213,7 @@ export default function Home() {
     }, t + 200);
 
     return () => { cancelled = true; };
-  }, [phase, mode, fireVoice]);
+  }, [phase, mode]);
 
   // ── User interactions ──
 

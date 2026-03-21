@@ -52,8 +52,8 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
         }
 
         @keyframes glowBreathe {
-          0%, 100% { transform: scale(${speaking ? '0.9' : '0.95'}); opacity: ${speaking ? '0.8' : '0.7'}; }
-          50% { transform: scale(${speaking ? '1.15' : '1.08'}); opacity: 1; }
+          0%, 100% { transform: scale(${speaking ? '0.9' : '0.95'}); opacity: ${speaking ? '0.9' : '0.7'}; }
+          50% { transform: scale(${speaking ? '1.25' : '1.08'}); opacity: 1; }
         }
 
         .piri-siri-orb {
@@ -75,8 +75,8 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
         }
 
         @keyframes orbBreathe {
-          0%, 100% { transform: scale(${speaking ? '0.93' : '0.96'}); }
-          50% { transform: scale(${speaking ? '1.08' : '1.04'}); }
+          0%, 100% { transform: scale(${speaking ? '0.85' : '0.96'}); }
+          50% { transform: scale(${speaking ? '1.18' : '1.04'}); }
         }
 
         /* Gradient layers — rotating in different directions/speeds */
@@ -96,7 +96,7 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
             rgba(200, 160, 255, 0.6),
             rgba(100, 180, 255, 0.9)
           );
-          animation: spinSlow ${speaking ? '3s' : '8s'} linear infinite;
+          animation: spinSlow ${speaking ? '2s' : '8s'} linear infinite;
           filter: blur(${s * 0.12}px);
         }
 
@@ -109,7 +109,7 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
             rgba(100, 220, 255, 0.4),
             rgba(255, 255, 255, 0.6)
           );
-          animation: spinMed ${speaking ? '2.5s' : '6s'} linear infinite reverse;
+          animation: spinMed ${speaking ? '1.5s' : '6s'} linear infinite reverse;
           filter: blur(${s * 0.08}px);
         }
 
@@ -122,7 +122,7 @@ export default function PiriOrb({ size = 150, speaking = false }: { size?: numbe
             rgba(160, 120, 255, 0.5),
             rgba(140, 100, 255, 0.5)
           );
-          animation: spinFast 12s linear infinite;
+          animation: spinFast ${speaking ? '8s' : '12s'} linear infinite;
           filter: blur(${s * 0.15}px);
           opacity: 0.7;
         }
