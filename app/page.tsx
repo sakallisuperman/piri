@@ -346,11 +346,11 @@ export default function Home() {
             left: '50%',
             opacity: orbVisible ? 1 : 0,
             transform: orbVisible
-              ? 'translate(-50%, -50%) translateY(-140px) scale(1)'
-              : 'translate(-50%, -50%) translateY(-140px) scale(0.6)',
+              ? 'translate(-50%, -50%) translateY(-120px) scale(1)'
+              : 'translate(-50%, -50%) translateY(-120px) scale(0.6)',
           }}
         >
-          <PiriOrb size={200} speaking={voice.isSpeaking} />
+          <PiriOrb size={140} speaking={voice.isSpeaking} />
         </div>
       )}
 
@@ -455,7 +455,7 @@ export default function Home() {
                 </div>
                 {/* Inline breathing orb below sub buttons */}
                 <div className="flex justify-center pt-6 animate-fadeUp">
-                  <PiriOrb size={90} speaking={voice.isSpeaking} />
+                  <PiriOrb size={70} speaking={voice.isSpeaking} />
                 </div>
               </div>
             )}
