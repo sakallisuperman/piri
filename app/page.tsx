@@ -69,6 +69,11 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean, 
   const [current, setCurrent] = useState('');
   const [done, setDone] = useState(false);
   const ran = useRef(false);
+  const onLineCompleteRef = useRef(onLineComplete);
+
+  useEffect(() => {
+    onLineCompleteRef.current = onLineComplete;
+  });
 
   useEffect(() => {
     if (!active || ran.current) return;
@@ -84,13 +89,13 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean, 
         setTimeout(() => { if (!cancelled) setCurrent(line.text.slice(0, ci + 1)); }, t + ci * speed);
       });
       const end = t + chars.length * speed + 120;
-      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); onLineComplete?.(line.text); setCurrent(''); } }, end);
+      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); onLineCompleteRef.current?.(line.text); setCurrent(''); } }, end);
       t = end + line.pause;
     });
 
     setTimeout(() => { if (!cancelled) setDone(true); }, t + 200);
     return () => { cancelled = true; };
-  }, [active, lines, onLineComplete]);
+  }, [active, lines]);
 
   return { displayed, current, done };
 }
