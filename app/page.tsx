@@ -83,13 +83,14 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean, 
 
     lines.forEach((line) => {
       if (line.text === '') { t += line.pause; return; }
+      onLineCompleteRef.current?.(line.text);
       const chars = line.text.split('');
       const speed = 38;
       chars.forEach((_, ci) => {
         setTimeout(() => { if (!cancelled) setCurrent(line.text.slice(0, ci + 1)); }, t + ci * speed);
       });
       const end = t + chars.length * speed + 120;
-      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); onLineCompleteRef.current?.(line.text); setCurrent(''); } }, end);
+      setTimeout(() => { if (!cancelled) { setDisplayed((p) => [...p, line.text]); setCurrent(''); } }, end);
       t = end + line.pause;
     });
 
@@ -116,6 +117,12 @@ export default function Home() {
   const [orbVisible, setOrbVisible] = useState(false);
   const [orbSide, setOrbSide] = useState(false); // orb docked to side
   const [userInteracted, setUserInteracted] = useState(false);
+
+  // Unlock autoplay by resuming AudioContext
+  useEffect(() => {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    ctx.resume();
+  }, []);
 
   // Track voice triggers to avoid double-firing
   const voiceFired = useRef<Set<string>>(new Set());
@@ -200,12 +207,13 @@ export default function Home() {
     let t = 300;
 
     lines.forEach((line) => {
+      voiceSpeakRef.current(line);
       const chars = line.split('');
       chars.forEach((_, ci) => {
         setTimeout(() => { if (!cancelled) setSubCurrent(line.slice(0, ci + 1)); }, t + ci * 30);
       });
       const end = t + chars.length * 30 + 120;
-      setTimeout(() => { if (!cancelled) { setSubText((p) => [...p, line]); voiceSpeakRef.current(line); setSubCurrent(''); } }, end);
+      setTimeout(() => { if (!cancelled) { setSubText((p) => [...p, line]); setSubCurrent(''); } }, end);
       t = end + 500;
     });
 
