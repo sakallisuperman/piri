@@ -83,10 +83,10 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean, 
 
     lines.forEach((line) => {
       if (line.text === '') { t += line.pause; return; }
-      onLineCompleteRef.current?.(line.text);
       const chars = line.text.split('');
       const speed = 38;
       chars.forEach((_, ci) => {
+        if (ci === 0) onLineCompleteRef.current?.(line.text);
         setTimeout(() => { if (!cancelled) setCurrent(line.text.slice(0, ci + 1)); }, t + ci * speed);
       });
       const end = t + chars.length * speed + 120;
@@ -104,6 +104,13 @@ function useTerminal(lines: { text: string; pause: number }[], active: boolean, 
 export default function Home() {
   const router = useRouter();
   const voice = usePiriVoice();
+
+  // Unlock audio autoplay on mobile/desktop without click
+  useEffect(() => {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    ctx.resume();
+  }, []);
+
   const [phase, setPhase] = useState<Phase>('dark');
   const [mode, setMode] = useState<Mode | null>(null);
   const [, setGender] = useState<Gender | null>(null);
@@ -117,12 +124,6 @@ export default function Home() {
   const [orbVisible, setOrbVisible] = useState(false);
   const [orbSide, setOrbSide] = useState(false); // orb docked to side
   const [userInteracted, setUserInteracted] = useState(false);
-
-  // Unlock autoplay by resuming AudioContext
-  useEffect(() => {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    ctx.resume();
-  }, []);
 
   // Track voice triggers to avoid double-firing
   const voiceFired = useRef<Set<string>>(new Set());
@@ -470,20 +471,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── Piri speaking indicator (centered under orb) ── */}
-      {voice.isSpeaking && (
-        <div className="fixed z-[16] animate-fadeUp" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) translateY(10px)' }}>
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl px-4 py-2 shadow-sm border border-white/70">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <style jsx global>{`
         .terminal-line {
