@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("ELEVENLABS_API_KEY exists:", !!process.env.ELEVENLABS_API_KEY);
+    console.log("ELEVENLABS_VOICE_ID exists:", !!process.env.ELEVENLABS_VOICE_ID);
+
     const { text } = await req.json();
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Missing text" }, { status: 400 });
