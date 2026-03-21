@@ -511,12 +511,18 @@ export default function DnaResultPage() {
 
             {/* Transition to dialog */}
             {phase === 'simulation' && (
-              <div className="text-center pt-2">
+              <div className="text-center pt-2 space-y-4">
                 <button
                   onClick={() => setPhase('dialog')}
                   className="text-sm text-slate-500 hover:text-slate-700 transition-colors underline underline-offset-4"
                 >
                   Devam et →
+                </button>
+                <button
+                  onClick={() => router.push('/chat')}
+                  className="px-8 py-3 rounded-2xl bg-slate-900 text-white font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-900/20"
+                >
+                  Piri ile Konuş
                 </button>
               </div>
             )}
@@ -573,62 +579,11 @@ export default function DnaResultPage() {
 
         {/* ── DNA Skorları (katlanabilir) ── */}
         <div className="animate-fadeUp">
-          <button
-            onClick={() => setDnaOpen(!dnaOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 rounded-2xl bg-white/40 border border-white/50 backdrop-blur-sm text-sm text-slate-500 hover:bg-white/60 transition-all"
-          >
-            <span className="flex items-center gap-2">
-              <span className="tracking-widest uppercase text-xs">Karar DNA</span>
-              <span className="font-mono text-xs text-slate-400">{dnaCode(scores)}</span>
-            </span>
-            <span className="text-xs">{dnaOpen ? '▲' : '▼'}</span>
-          </button>
-
-          {dnaOpen && (
-            <div className="mt-3 card space-y-5 animate-fadeUp">
-              <div className="grid grid-cols-2 gap-4">
-                {rows.map((item) => (
-                  <div key={item.key} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-600">{item.label}</span>
-                      <span className="text-xs font-medium text-slate-900">{item.value}</span>
-                    </div>
-                    <div className="w-full h-[4px] bg-slate-900/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-slate-900 rounded-full transition-all duration-700"
-                        style={{ width: `${item.value}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-2 pt-1">
-                <p className="text-xs tracking-widest text-slate-400 uppercase">Blokaj Sinyalleri</p>
-                <div className="flex flex-wrap gap-2">
-                  {topSignals.map((s) => (
-                    <span key={s.key} className="tag text-xs">
-                      {signalEmoji(s.key)} {signalLabel(s.key)} <span className="text-slate-400 ml-1">{s.value}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Text answers */}
-              {textAnswers.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <p className="text-xs tracking-widest text-slate-400 uppercase">Senin Sözlerin</p>
-                  <div className="grid gap-2">
-                    {textAnswers.slice(0, 3).map((t, i) => (
-                      <div key={i} className="rounded-xl bg-white/50 border border-white/60 p-3 text-xs text-slate-600">
-                        &ldquo;{t}&rdquo;
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <div className="text-center">
+            <p className="text-lg text-slate-800 leading-relaxed">
+              Karar DNA'n hazır.
+            </p>
+          </div>
         </div>
 
         {/* ── AI Error fallback ── */}
