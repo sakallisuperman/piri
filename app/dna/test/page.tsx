@@ -29,7 +29,7 @@ const AGREE_COLORS = [
 ];
 
 const AGREE_LABELS_SHORT = ['✕', '−', '○', '+', '✓'];
-const AGREE_LABELS_LONG = ['Hiç ben değil', 'Pek değil', 'Bazen', 'Çoğunlukla', 'Tam ben'];
+const AGREE_LABELS_LONG = ['Hiç ben değil', 'Nadiren', 'Bazen', 'Sıklıkla', 'Tam ben'];
 
 function DnaTestInner() {
   const router = useRouter();
