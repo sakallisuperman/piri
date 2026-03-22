@@ -29,6 +29,7 @@ const AGREE_COLORS = [
 ];
 
 const AGREE_LABELS_SHORT = ['✕', '−', '○', '+', '✓'];
+const AGREE_LABELS_LONG = ['Hiç ben değil', 'Pek değil', 'Bazen', 'Çoğunlukla', 'Tam ben'];
 
 function DnaTestInner() {
   const router = useRouter();
@@ -245,8 +246,10 @@ function DnaTestInner() {
                         transform: isSelected ? 'scale(1.05)' : 'scale(1)',
                       }}
                     >
-                      <span className="agree-symbol" style={{ color: c.text }}>{AGREE_LABELS_SHORT[index]}</span>
-                      <span className="agree-label" style={{ color: c.text }}>{label}</span>
+                      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'}}>
+                        <span className="agree-symbol" style={{fontSize: '20px', color: c.text}}>{AGREE_LABELS_SHORT[index]}</span>
+                        <span className="agree-label" style={{fontSize: '11px', color: c.text}}>{AGREE_LABELS_LONG[index]}</span>
+                      </div>
                     </button>
                   );
                 })}
