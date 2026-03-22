@@ -11,7 +11,7 @@ import {
   type Schema,
   type PiriDNA,
   type Mode,
-  CHOICE_6_SCORE,
+  CHOICE_5_SCORE,
 } from '../questions';
 
 type AnswerMap = Record<string, number | string>;
@@ -275,13 +275,11 @@ export default function DnaResultPage() {
     setTextAnswers(texts);
 
     // Profili güncelle — tüm veriler merkezi profile'a kaydedilir
-    if (dna) {
-      updateProfile({
-        scores: dna.schemas as unknown as Record<string, number>,
-        shadow: { dominantGroup: dna.profile } as unknown as Record<string, number>,
-        textAnswers: texts,
-      });
-    }
+    updateProfile({
+      scores: newDna.schemas as unknown as Record<string, number>,
+      shadow: { dominantGroup: newDna.profile } as unknown as Record<string, number>,
+      textAnswers: texts,
+    });
   }, [mode]);
 
   // Call AI once dna is ready
