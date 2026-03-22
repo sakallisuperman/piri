@@ -119,12 +119,12 @@ ${profileContext ? `
 [KULLANICI PROFİLİ — BUNU KULLANICIYA SÖYLEME]
 
 Dominant şemalar:
-${profile?.scores?.abandonment > 60 ? "- Terk edilme şeması aktif: güvenli ve sabit dur, ani değişim önerme, yalnız bırakma hissi verme." : ""}
-${profile?.scores?.defectiveness > 60 ? "- Yetersizlik şeması aktif: 'yetmezsin' döngüsünü kır, küçük kazanımları göster." : ""}
-${profile?.scores?.subjugation > 60 ? "- Boyun eğme şeması aktif: kendi sesini bulmasına yardım et, başkalarının beklentisinden ayır." : ""}
-${profile?.scores?.unrelenting > 60 ? "- Yüksek standartlar aktif: mükemmel karar diye bir şey yok hissini ver, hareketi kolaylaştır." : ""}
-${profile?.scores?.deprivation > 60 ? "- Duygusal yoksunluk aktif: ihtiyaçlarını ifade etmesine alan aç, yük olmadığını hissettir." : ""}
-${profile?.scores?.avoidance > 60 ? "- Kaçınma şeması aktif: ertelemenin bedelini göster, küçük somut adım öner." : ""}
+${(profile?.scores?.abandonment ?? 0) > 60 ? "- Terk edilme şeması aktif: güvenli ve sabit dur, ani değişim önerme, yalnız bırakma hissi verme." : ""}
+${(profile?.scores?.defectiveness ?? 0) > 60 ? "- Yetersizlik şeması aktif: 'yetmezsin' döngüsünü kır, küçük kazanımları göster." : ""}
+${(profile?.scores?.subjugation ?? 0) > 60 ? "- Boyun eğme şeması aktif: kendi sesini bulmasına yardım et, başkalarının beklentisinden ayır." : ""}
+${(profile?.scores?.unrelenting ?? 0) > 60 ? "- Yüksek standartlar aktif: mükemmel karar diye bir şey yok hissini ver, hareketi kolaylaştır." : ""}
+${(profile?.scores?.deprivation ?? 0) > 60 ? "- Duygusal yoksunluk aktif: ihtiyaçlarını ifade etmesine alan aç, yük olmadığını hissettir." : ""}
+${(profile?.scores?.avoidance ?? 0) > 60 ? "- Kaçınma şeması aktif: ertelemenin bedelini göster, küçük somut adım öner." : ""}
 
 Kullanıcının kendi sözleri (bunları aktif kullan, üzerine sor):
 ${profile?.textAnswers?.slice(0,6).map((t, i) => `${i+1}. "${t}"`).join('\n')}
