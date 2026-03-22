@@ -20,8 +20,8 @@
 // Katman 3 — Köken: Nereden geliyor? (bu sesi ilk nereden duydun?)
 //
 // Scoring:
-//   CHOICE_6 → [0, 20, 40, 60, 80, 100]
-//   reverse: true → [100, 80, 60, 40, 20, 0]
+//   CHOICE_5 → [0, 25, 50, 75, 100]
+//   reverse: true → [100, 75, 50, 25, 0]
 //   Her şemanın skoru = o şemaya bağlı soruların ortalaması
 //   Yüksek skor = o şema aktif ve bloke edici
 //
@@ -71,16 +71,15 @@ export type Question = {
   scoringHint?: string;
 };
 
-export const CHOICE_6 = [
-  'Hiç ben değil',   // 0
-  'Pek değil',       // 20
-  'Biraz',           // 40
-  'Oldukça',         // 60
-  'Çok',             // 80
-  'Tam ben',         // 100
+export const CHOICE_5 = [
+  '−−',   // 0
+  '−',    // 25
+  '○',    // 50
+  '+',    // 75
+  '++',   // 100
 ];
 
-export const CHOICE_6_SCORE = [0, 20, 40, 60, 80, 100];
+export const CHOICE_5_SCORE = [0, 25, 50, 75, 100];
 
 // ═══════════════════════════════════════════════════════════════
 // İŞ KAPISI (WORK)
@@ -94,63 +93,63 @@ const WORK_LAYER_1: Question[] = [
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'Bir projede hata yaptığımda, o hatayı kafamdan atmak için uzun süre uğraşırım.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_2',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'İş yerinde fikirlerimi söylemeden önce "acaba yanlış mı bulurlar?" diye düşünürüm.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_3',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'Yeni bir sorumluluk ya da terfi teklifi geldiğinde içimde ilk hissettığim heyecan değil, kaygıdır.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_4',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'İş yerinde zor bir durum yaşadığımda bunu kimseyle paylaşmak yerine kendi başıma çözmeye çalışırım.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_5',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'Mevcut işimde mutlu olmasam da bırakmayı düşünmek bile içimi sıkıştırır.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_6',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'Ekipten biri soğuk ya da mesafeli davrandığında bunun benim yüzümden olduğunu düşünürüm.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_7',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'İşimi ne kadar iyi yapsam da "daha iyisini yapabilirdim" hissi peşimi bırakmaz.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_8',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'Hayır demem gereken bir iş teklifi ya da ricası geldiğinde genellikle kabul ederim.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w1_9',
     mode: 'work', layer: 1, inputType: 'choice',
     text: 'İş hayatında gerçek anlamda takdir gördüğümü, değerimin bilindiğini nadiren hissederim.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -161,63 +160,63 @@ const WORK_LAYER_2: Question[] = [
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'İş hayatında başarılı olmak, sevilmek için değil — hayatta kalmak için gerekli gibi hisseder.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_2',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'Birinin benden memnun olmadığını sezersem, ne yapıp ettim diye zinim çalışmaya başlar.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_3',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'Kendi isteklerimi öne çıkarmak bencillik gibi gelir.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_4',
     mode: 'work', layer: 2, inputType: 'choice',
     text: '"Ortalama" olmak benim için kabul edilebilir değil — ya en iyisi olacağım ya da hiç.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_5',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'İş hayatımda büyük bir değişiklik yapmayı düşündüğümde aklıma önce "ya yanlış giderse" gelir.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_6',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'Ne kadar çalışsam da içimde "aslında yeterince iyi değilim" diyen bir ses var.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_7',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'Destek istemek ya da "bilmiyorum" demek zayıflık göstergesi gibi gelir.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_8',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'İş yerinde bir şeyler ters gittiğinde çevremdeki insanların beni terk edeceğinden ya da dışlayacağından korkarım.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'w2_9',
     mode: 'work', layer: 2, inputType: 'choice',
     text: 'Hata yapmamak için bazen hiç başlamamayı tercih ederim.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -299,63 +298,63 @@ const LIFE_LAYER_1: Question[] = [
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Hayatımda büyük bir değişiklik yapmam gerekse bile "şu an doğru zaman değil" diye ertelerim.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_2',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Başkalarının benden ne beklediğini düşünerek hayatıma dair kararlar alırım.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_3',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'İçimde olmak istediğim bir yer var ama oraya giden yolu hayal etmek bile korkutucu gelir.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_4',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Yaşadığım zorlukları başkalarıyla paylaşmak yerine içimde tutmayı tercih ederim.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_5',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Hayatımın bir döneminde insanların benden uzaklaştığını ya da beni bıraktığını hissettim.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_6',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Kendim için bir şey yaparken bile "bu yeterince iyi mi?" diye sorgularım.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_7',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Hayatımda neyin eksik olduğunu biliyorum ama değiştirmek için adım atmak yerine olduğu gibi kabul ederim.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_8',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Kendi ihtiyaçlarımı ifade ettiğimde insanlar benden uzaklaşır gibi hissederim.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l1_9',
     mode: 'life', layer: 1, inputType: 'choice',
     text: 'Gerçekten mutlu olduğumu, hayatımı yaşadığımı hissettiğim anlar çok az.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -365,63 +364,63 @@ const LIFE_LAYER_2: Question[] = [
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Hayatımda "bu benim istediğim" diyebileceğim bir şeyin var mı? İçimden gelen cevap genellikle hayır.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_2',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Hayatımı değiştirmekten çok, mevcut duruma adapte olmak daha gerçekçi gelir.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_3',
     mode: 'life', layer: 2, inputType: 'choice',
     text: '"Ben kimim?" sorusu beni heyecanlandırmaktan çok bunaltır.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_4',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Etrafımdaki insanları hayal kırıklığına uğratmamak, kendi mutluluğumdan daha önce gelir.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_5',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Hayatımda istikrarı korumak için bazı şeylerden vazgeçmeyi normal karşılarım.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_6',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Yaşadığım hayat benim seçimlerimden mi oluşuyor, yoksa koşulların beni getirdiği yerden mi — içimden gelen cevap ikincisi.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_7',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Bir şeyi "iyi" yapabilmek için çok fazla zaman ve enerji harcarım, "yeterli" benim için yetmez.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_8',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Hayatımda birileri beni gerçekten görüyor, anlıyor ve değer veriyor diyemiyorum.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'l2_9',
     mode: 'life', layer: 2, inputType: 'choice',
     text: 'Zor bir karar vermem gerektiğinde ilk içgüdüm "bekle, henüz hazır değilim" olmaktadır.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -502,63 +501,63 @@ const LOVE_LAYER_1: Question[] = [
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Bir ilişkide karşımdaki kişi mesafe koyduğunda ya da geç cevap verdiğinde içim sıkışır.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_2',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Sevdiğim insanı memnun etmek için kendi isteklerimden vazgeçmek bana doğal gelir.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_3',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Bir ilişkide tamamen kendim olursam, karşımdaki beni sevmeyebilir diye düşünürüm.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_4',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Sevdiğim insanlardan gerçek anlamda destek, anlayış ya da yakınlık almakta zorlanırım.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_5',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Bir ilişkide sorun çıktığında önce "bu ilişkiyi kurtarmak için ne yapabilirim?" diye düşünürüm.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_6',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Duygusal olarak yakın olmak beni hem çeker hem de ürpertir.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_7',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Sevdiğim kişiye kızdığımda bunu ifade etmek yerine içime atarım.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_8',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Bir ilişkide "yeterince güzel/zeki/ilginç değilim" hissi aklıma gelir.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v1_9',
     mode: 'love', layer: 1, inputType: 'choice',
     text: 'Gerçekten sevdiğim birine "seni seviyorum" demek ya da ihtiyacım olduğunu söylemek zor gelir.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -568,63 +567,63 @@ const LOVE_LAYER_2: Question[] = [
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Bir ilişkide ne kadar iyi davranırsam davranayım, er ya da geç yalnız kalacağıma inanırım.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_2',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Sevilmek için "iyi biri" olmam, kendim olmamdan daha önemli gibi hisseder.',
     schema: 'subjugation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_3',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Gerçek anlamda bir yakınlık kurmak, aynı zamanda zarar görme riskini de taşır — bu yüzden mesafe daha güvenli.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_4',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Kusurlarımı ya da zayıf taraflarımı gören biri beni seviyor olamaz diye düşünürüm.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_5',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Bir ilişkide gerçek ihtiyaçlarımı ifade etmek, karşımdakini yüklemek gibi hisseder.',
     schema: 'deprivation',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_6',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Bir ilişkiyi "mükemmel" hale getirmeye çalışmak yerine var olduğu haliyle kabul etmekte zorlanırım.',
     schema: 'unrelenting',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_7',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Biri beni terk edebilir diye düşününce, önlem olarak önce ben mesafe koyarım.',
     schema: 'abandonment',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_8',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Sevgi göstermek ya da almak bende bir şeylerin ters gideceği hissini uyandırır.',
     schema: 'avoidance',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
   {
     id: 'v2_9',
     mode: 'love', layer: 2, inputType: 'choice',
     text: 'Bir ilişkide kendim olduğumda sevilmek, bir rol oynadığımda sevilmekten daha az inanılır gelir.',
     schema: 'defectiveness',
-    options: CHOICE_6,
+    options: CHOICE_5,
   },
 ];
 
@@ -730,7 +729,7 @@ export type PiriDNA = {
 
 // Choice cevabını skora çevir
 export function choiceToScore(answerIndex: number, reverse = false): number {
-  const scores = [0, 20, 40, 60, 80, 100];
+  const scores = [0, 25, 50, 75, 100];
   const score = scores[answerIndex] ?? 0;
   return reverse ? 100 - score : score;
 }

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getQuestions,
-  CHOICE_6,
+  CHOICE_5,
   type Mode,
   type Question,
 } from '../questions';
@@ -19,17 +19,16 @@ type TransitionState = {
   text: string;
 };
 
-// 6-button colors: red → orange → yellow → light green → green → dark green
+// 5-button colors: red → orange → gray → light green → dark green
 const AGREE_COLORS = [
   { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)', text: '#dc2626', hoverBg: 'rgba(239,68,68,0.22)' },
   { bg: 'rgba(249,115,22,0.10)', border: 'rgba(249,115,22,0.25)', text: '#ea580c', hoverBg: 'rgba(249,115,22,0.20)' },
-  { bg: 'rgba(234,179,8,0.10)', border: 'rgba(234,179,8,0.25)', text: '#d97706', hoverBg: 'rgba(234,179,8,0.20)' },
+  { bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.25)', text: '#64748b', hoverBg: 'rgba(148,163,184,0.20)' },
   { bg: 'rgba(134,239,172,0.10)', border: 'rgba(134,239,172,0.25)', text: '#16a34a', hoverBg: 'rgba(134,239,172,0.20)' },
-  { bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.25)', text: '#16a34a', hoverBg: 'rgba(34,197,94,0.20)' },
   { bg: 'rgba(22,163,74,0.12)', border: 'rgba(22,163,74,0.3)', text: '#15803d', hoverBg: 'rgba(22,163,74,0.22)' },
 ];
 
-const AGREE_LABELS_SHORT = ['✕', '−', '○', '~', '+', '✓'];
+const AGREE_LABELS_SHORT = ['−−', '−', '○', '+', '++'];
 
 function DnaTestInner() {
   const router = useRouter();
@@ -232,7 +231,7 @@ function DnaTestInner() {
             <div className="mt-8">
               {/* 5-button agree/disagree row */}
               <div className="flex items-stretch gap-2">
-                {CHOICE_6.map((label, index) => {
+                {CHOICE_5.map((label, index) => {
                   const c = AGREE_COLORS[index];
                   const isSelected = selected === index;
                   return (
