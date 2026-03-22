@@ -28,7 +28,7 @@ const AGREE_COLORS = [
   { bg: 'rgba(22,163,74,0.12)', border: 'rgba(22,163,74,0.3)', text: '#15803d', hoverBg: 'rgba(22,163,74,0.22)' },
 ];
 
-const AGREE_LABELS_SHORT = ['−−', '−', '○', '+', '++'];
+const AGREE_LABELS_SHORT = ['✕', '−', '○', '+', '✓'];
 
 function DnaTestInner() {
   const router = useRouter();
