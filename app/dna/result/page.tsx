@@ -509,23 +509,27 @@ export default function DnaResultPage() {
               </div>
             )}
 
-            {/* Transition to dialog */}
-            {phase === 'simulation' && (
-              <div className="text-center pt-2 space-y-4">
-                <button
-                  onClick={() => setPhase('dialog')}
-                  className="text-sm text-slate-500 hover:text-slate-700 transition-colors underline underline-offset-4"
-                >
-                  Devam et →
-                </button>
-                <button
-                  onClick={() => router.push('/chat')}
-                  className="px-8 py-3 rounded-2xl bg-slate-900 text-white font-medium transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-900/20"
-                >
-                  Piri ile Konuş
-                </button>
+            {/* Piri ile Konuş Daveti - Simülasyon altında sabit */}
+            <div className="text-center space-y-6 animate-fadeUp py-4">
+              <div className="max-w-md mx-auto space-y-3">
+                <p className="text-lg text-slate-800 leading-relaxed">
+                  Seni tanımaya devam edeceğim.
+                </p>
+                <p className="text-slate-600 leading-relaxed">
+                  Peki sen ne yapmak istiyorsun? Hangi konuda karar almak istiyor ama uygulayamıyorsun?
+                </p>
+                <p className="text-slate-500 text-sm italic">
+                  Anlat. Sorunlarını birlikte çözelim.
+                </p>
               </div>
-            )}
+
+              <button
+                onClick={() => router.push('/chat')}
+                className="px-10 py-4 rounded-2xl bg-slate-900 text-white font-medium text-lg transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-900/20"
+              >
+                Piri ile Konuş
+              </button>
+            </div>
           </div>
         )}
 
