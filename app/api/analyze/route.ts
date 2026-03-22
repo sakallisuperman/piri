@@ -6,34 +6,25 @@ import { NextRequest, NextResponse } from 'next/server';
 // Output: AI-generated analysis, simulation, action
 // ───────────────────────────────────────────────
 
-type CoreDimension = 'risk' | 'uncertainty' | 'regret' | 'agency' | 'energy' | 'attachment';
-type ShadowSignal = 'perfectionism' | 'approval' | 'abandonment' | 'control' | 'avoidance' | 'innerCritic';
+type SchemaName = 'abandonment' | 'defectiveness' | 'subjugation' | 'unrelenting' | 'deprivation' | 'avoidance';
 
 type AnalyzeRequest = {
   mode: 'work' | 'life' | 'love';
   sub: string;
-  scores: Record<CoreDimension, number>;
-  shadow: Record<ShadowSignal, number>;
+  schemas: Record<SchemaName, number>;  // scores yerine schemas
+  dominantSchema: SchemaName;
+  profile: 'schema_driven' | 'persona_driven' | 'shadow_driven';
   textAnswers: string[];
   lang: 'tr' | 'en';
 };
 
-const SHADOW_NAMES_TR: Record<ShadowSignal, string> = {
-  perfectionism: 'Mükemmeliyet baskısı',
-  approval: 'Onay ihtiyacı',
-  abandonment: 'Terk edilme hassasiyeti',
-  control: 'Kontrol ihtiyacı',
-  avoidance: 'Kaçınma eğilimi',
-  innerCritic: 'İçsel eleştirmen',
-};
-
-const CORE_NAMES_TR: Record<CoreDimension, string> = {
-  risk: 'Risk algısı',
-  uncertainty: 'Belirsizlik hassasiyeti',
-  regret: 'Pişmanlık eğilimi',
-  agency: 'Kontrol / irade',
-  energy: 'Enerji durumu',
-  attachment: 'Bağlanma kalıbı',
+const SCHEMA_NAMES_TR: Record<SchemaName, string> = {
+  abandonment:   'Terk Edilme',
+  defectiveness: 'Yetersizlik',
+  subjugation:   'Boyun Eğme',
+  unrelenting:   'Yüksek Standartlar',
+  deprivation:   'Duygusal Yoksunluk',
+  avoidance:     'Kaçınma',
 };
 
 function buildSystemPrompt(): string {
@@ -59,17 +50,16 @@ JSON formatında yanıt ver. Başka hiçbir şey yazma.`;
 function buildUserPrompt(data: AnalyzeRequest): string {
   const modeLabel = data.mode === 'work' ? 'İş' : data.mode === 'life' ? 'Yol' : 'Aşk';
 
-  // Top 3 shadow signals
-  const topShadow = Object.entries(data.shadow)
+  // Top 3 schemas
+  const topSchemas = Object.entries(data.schemas)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 3)
-    .map(([k, v]) => `${SHADOW_NAMES_TR[k as ShadowSignal]}: ${v}/100`)
+    .map(([k, v]) => `${SCHEMA_NAMES_TR[k as SchemaName]}: ${v}/100`)
     .join(', ');
 
-  // Core scores
-  const coreLines = Object.entries(data.scores)
-    .map(([k, v]) => `${CORE_NAMES_TR[k as CoreDimension]}: ${v}/100`)
-    .join(', ');
+  // Dominant schema and profile type
+  const dominantInfo = `Baskın şema: ${SCHEMA_NAMES_TR[data.dominantSchema]} (${data.schemas[data.dominantSchema]}/100)
+Profil tipi: ${data.profile}`;
 
   // Text answers
   const textBlock = data.textAnswers.length > 0
@@ -79,8 +69,8 @@ function buildUserPrompt(data: AnalyzeRequest): string {
   return `Kapı: ${modeLabel}
 Alt konu: ${data.sub}
 
-Core skorlar: ${coreLines}
-Baskın blokaj sinyalleri: ${topShadow}
+${dominantInfo}
+Baskın şemalar: ${topSchemas}
 ${textBlock}
 
 Şimdi bu verilerle aşağıdaki JSON yapısını üret:

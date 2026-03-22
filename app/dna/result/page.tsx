@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import PiriOrb from '../../components/PiriOrb';
 import { updateProfile } from '../../lib/profile';
 import {
-  getQuestionsForMode,
-  scoreChoiceIndex,
-  type CoreDimension,
+  QUESTION_BANK,
+  calculateDNA,
+  dnaToPromptContext,
+  type Schema,
+  type PiriDNA,
   type Mode,
-  type ShadowSignal,
+  CHOICE_6_SCORE,
 } from '../questions';
 
-type Scores = Record<CoreDimension, number>;
-type ShadowScores = Record<ShadowSignal, number>;
 type AnswerMap = Record<string, number | string>;
 
 type TimelineItem = { period: string; text: string };
@@ -45,63 +45,70 @@ type AIAnalysis = {
 
 type Phase = 'insight' | 'simulation' | 'dialog';
 
-function signalLabel(signal: ShadowSignal) {
-  const map: Record<ShadowSignal, string> = {
-    perfectionism: 'Mükemmeliyet baskısı',
-    approval: 'Onay ihtiyacı',
-    abandonment: 'Terk edilme hassasiyeti',
-    control: 'Kontrol ihtiyacı',
-    avoidance: 'Kaçınma eğilimi',
-    innerCritic: 'İçsel eleştirmen',
+function signalLabel(signal: Schema) {
+  const map: Record<Schema, string> = {
+    abandonment: 'Terk Edilme',
+    defectiveness: 'Yetersizlik',
+    subjugation: 'Boyun Eğme',
+    unrelenting: 'Yüksek Standartlar',
+    deprivation: 'Duygusal Yoksunluk',
+    avoidance: 'Kaçınma',
   };
   return map[signal] || signal;
 }
 
-function signalEmoji(signal: ShadowSignal) {
-  const map: Record<ShadowSignal, string> = {
-    perfectionism: '🎯',
-    approval: '👁',
+function signalEmoji(signal: Schema) {
+  const map: Record<Schema, string> = {
     abandonment: '🌊',
-    control: '🔒',
+    defectiveness: '🪞',
+    subjugation: '🔒',
+    unrelenting: '🎯',
+    deprivation: '🌑',
     avoidance: '🛡',
-    innerCritic: '⚡',
   };
   return map[signal] || '◆';
 }
 
-function dnaCode(scores: Scores) {
-  const band = (v: number) => (v <= 33 ? 0 : v <= 66 ? 1 : 2);
-  return `R${band(scores.risk)}-U${band(scores.uncertainty)}-G${band(scores.regret)}-A${band(scores.agency)}-E${band(scores.energy)}-T${band(scores.attachment)}`;
+function dnaCode(dna: PiriDNA) {
+  const band = (v: number) => v <= 33 ? 'L' : v <= 66 ? 'M' : 'H';
+  return [
+    'AB' + band(dna.schemas.abandonment),
+    'DF' + band(dna.schemas.defectiveness),
+    'SB' + band(dna.schemas.subjugation),
+    'UN' + band(dna.schemas.unrelenting),
+    'DP' + band(dna.schemas.deprivation),
+    'AV' + band(dna.schemas.avoidance),
+  ].join('-');
 }
 
-function fallbackComment(topSignals: { key: ShadowSignal; value: number }[]) {
+function fallbackComment(topSignals: { key: Schema; value: number }[]) {
   const top = topSignals[0]?.key;
   const second = topSignals[1]?.key;
 
-  const comments: Record<ShadowSignal, string[]> = {
-    avoidance: [
-      'Kararsız değilsin — bir şeyi açık tutarak kendini koruyorsun.',
-      'Ertelemek senin için bir karar. Ama bedeli görünmez birikir.',
-    ],
-    control: [
-      'Sorun cesaret değil. Kontrolü kaybetme ihtimali seni durduruyor.',
-      'Her şeyi hesaplayamazsın. Ama bunu bilmek seni rahatlatmıyor.',
-    ],
-    perfectionism: [
-      'Yüksek standartların karar almayı zorlaştırıyor. "Yeterince iyi" senin için yeterli değil.',
-      'Kusursuz zamanlamayı bekliyorsun. O zaman hiç gelmeyecek.',
-    ],
-    approval: [
-      'Kendi sesin var. Ama başka sesler onu bastırıyor.',
-      'Başkalarının ne düşüneceği, kendi istediğinden daha ağır basıyor.',
-    ],
+  const comments: Record<Schema, string[]> = {
     abandonment: [
-      'Belirsizlik senin için sadece belirsizlik değil. Bir tetiklenme alanı.',
-      'Kaybetme korkusu seni hareket edemez hale getiriyor.',
+      'Terk edilme korkusu seni belirsizlikte tutuyor.',
+      'Kaybetme ihtimali karar almayı durduruyor.',
     ],
-    innerCritic: [
-      'En sert baskı dışarıdan değil — içeriden geliyor.',
-      'İçindeki ses "yetmezsin" diyor. Bu ses sana ait değil.',
+    defectiveness: [
+      'Yetersizlik hissi seni hareketsiz bırakıyor.',
+      'Kendine güven eksikliği kararları zorlaştırıyor.',
+    ],
+    subjugation: [
+      'Boyun eğme eğilimi seni kendi ihtiyaçlarını erteletiyor.',
+      'Başkalarının ihtiyaçları seninkilerden önde geliyor.',
+    ],
+    unrelenting: [
+      'Yüksek standartların seni mükemmelliği beklemeye zorluyor.',
+      'Hiçbir şey yeterince iyi değil.',
+    ],
+    deprivation: [
+      'Duygusal yoksunluk hissi seni açgözlü yapıyor.',
+      'İhtiyaçların karşılanmamış gibi hissediyorsun.',
+    ],
+    avoidance: [
+      'Kaçınma eğilimi seni sorunlardan uzak tutuyor.',
+      'Ama sorunlar seni buluyor.',
     ],
   };
 
@@ -110,13 +117,13 @@ function fallbackComment(topSignals: { key: ShadowSignal; value: number }[]) {
 
   let secondPart = '';
   if (second) {
-    const secondLabels: Record<ShadowSignal, string> = {
-      avoidance: 'Kaçınma eğilimin bunu pekiştiriyor.',
-      control: 'Kontrol ihtiyacın bunu derinleştiriyor.',
-      perfectionism: 'Mükemmeliyetçiliğin bunu besliyor.',
-      approval: 'Onay arayışın bunu güçlendiriyor.',
-      abandonment: 'Kaybetme korkun bunu tetikliyor.',
-      innerCritic: 'İçsel eleştirmenin bunu besliyor.',
+    const secondLabels: Record<Schema, string> = {
+      abandonment: 'Terk edilme korkun bunu tetikliyor.',
+      defectiveness: 'Yetersizlik hissin bunu besliyor.',
+      subjugation: 'Boyun eğme eğilimin bunu güçlendiriyor.',
+      unrelenting: 'Yüksek standartların bunu derinleştiriyor.',
+      deprivation: 'Duygusal yoksunluk hissin bunu pekiştiriyor.',
+      avoidance: 'Kaçınma eğilimin bunu destekliyor.',
     };
     secondPart = ' ' + secondLabels[second];
   }
@@ -231,8 +238,7 @@ function getHardcodedScenarios(mode: string): Scenario[] {
 
 export default function DnaResultPage() {
   const router = useRouter();
-  const [scores, setScores] = useState<Scores | null>(null);
-  const [shadow, setShadow] = useState<ShadowScores | null>(null);
+  const [dna, setDna] = useState<PiriDNA | null>(null);
   const [textAnswers, setTextAnswers] = useState<string[]>([]);
   const [aiResult, setAiResult] = useState<AIAnalysis | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -249,71 +255,38 @@ export default function DnaResultPage() {
     ? localStorage.getItem('piri_sub')
     : null) ?? '';
 
-  // Calculate scores
+  // Calculate DNA
   useEffect(() => {
     const rawStored = localStorage.getItem(`piri_answers_${mode}`);
     if (!rawStored) return;
 
     const answers: AnswerMap = JSON.parse(rawStored);
-    const questions = getQuestionsForMode(mode);
-
-    const coreRaw: Scores = { risk: 0, uncertainty: 0, regret: 0, agency: 0, energy: 0, attachment: 0 };
-    const coreCount: Scores = { risk: 0, uncertainty: 0, regret: 0, agency: 0, energy: 0, attachment: 0 };
-    const shadowRaw: ShadowScores = { perfectionism: 0, approval: 0, abandonment: 0, control: 0, avoidance: 0, innerCritic: 0 };
-    const shadowCount: ShadowScores = { perfectionism: 0, approval: 0, abandonment: 0, control: 0, avoidance: 0, innerCritic: 0 };
     const texts: string[] = [];
 
-    questions.forEach((q) => {
-      const answer = answers[q.id];
-      if (answer === undefined) return;
-
-      if (q.inputType === 'text') {
-        if (typeof answer === 'string' && answer.trim()) texts.push(answer.trim());
-        return;
+    // Extract text answers
+    Object.values(answers).forEach((answer) => {
+      if (typeof answer === 'string' && answer.trim()) {
+        texts.push(answer.trim());
       }
-
-      const index = Number(answer);
-      const base = scoreChoiceIndex(index);
-      const value = q.reverse ? 4 - base : base;
-
-      coreRaw[q.primary] += value;
-      coreCount[q.primary] += 1;
-      q.secondary?.forEach((s) => {
-        shadowRaw[s] += value;
-        shadowCount[s] += 1;
-      });
     });
 
-    const normCore = (dim: CoreDimension) =>
-      coreCount[dim] ? Math.round((coreRaw[dim] / (coreCount[dim] * 4)) * 100) : 0;
-    const normShadow = (sig: ShadowSignal) =>
-      shadowCount[sig] ? Math.round((shadowRaw[sig] / (shadowCount[sig] * 4)) * 100) : 0;
-
-    const newScores: Scores = {
-      risk: normCore('risk'), uncertainty: normCore('uncertainty'), regret: normCore('regret'),
-      agency: normCore('agency'), energy: normCore('energy'), attachment: normCore('attachment'),
-    };
-    const newShadow: ShadowScores = {
-      perfectionism: normShadow('perfectionism'), approval: normShadow('approval'),
-      abandonment: normShadow('abandonment'), control: normShadow('control'),
-      avoidance: normShadow('avoidance'), innerCritic: normShadow('innerCritic'),
-    };
-
-    setScores(newScores);
-    setShadow(newShadow);
+    const newDna = calculateDNA(answers, QUESTION_BANK, mode);
+    setDna(newDna);
     setTextAnswers(texts);
 
     // Profili güncelle — tüm veriler merkezi profile'a kaydedilir
-    updateProfile({
-      scores: newScores,
-      shadow: newShadow,
-      textAnswers: texts,
-    });
+    if (dna) {
+      updateProfile({
+        scores: dna.schemas as unknown as Record<string, number>,
+        shadow: { dominantGroup: dna.profile } as unknown as Record<string, number>,
+        textAnswers: texts,
+      });
+    }
   }, [mode]);
 
-  // Call AI once scores are ready
+  // Call AI once dna is ready
   useEffect(() => {
-    if (!scores || !shadow) return;
+    if (!dna) return;
 
     const cached = localStorage.getItem(`piri_ai_${mode}`);
     if (cached) {
@@ -329,7 +302,15 @@ export default function DnaResultPage() {
     fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode, sub, scores, shadow, textAnswers, lang: 'tr' }),
+      body: JSON.stringify({
+        mode,
+        sub,
+        schemas: dna.schemas,
+        dominantSchema: Object.entries(dna.schemas).sort(([, a], [, b]) => b - a)[0][0] as any,
+        profile: dna.profile,
+        textAnswers,
+        lang: 'tr'
+      }),
     })
       .then((r) => {
         if (!r.ok) throw new Error('API error');
@@ -351,17 +332,17 @@ export default function DnaResultPage() {
       })
       .catch(() => setAiError(true))
       .finally(() => setAiLoading(false));
-  }, [scores, shadow, mode, sub, textAnswers]);
+  }, [dna, mode, sub, textAnswers]);
 
   const topSignals = useMemo(() => {
-    if (!shadow) return [];
-    return Object.entries(shadow)
-      .map(([key, value]) => ({ key: key as ShadowSignal, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 3);
-  }, [shadow]);
+    if (!dna) return [];
+    return (Object.entries(dna.schemas) as [Schema, number][])
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([key, value]) => ({ key, value }));
+  }, [dna]);
 
-  if (!scores || !shadow) {
+  if (!dna) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
@@ -371,12 +352,12 @@ export default function DnaResultPage() {
   }
 
   const rows = [
-    { key: 'risk', label: 'Risk Algısı', value: scores.risk },
-    { key: 'uncertainty', label: 'Belirsizlik', value: scores.uncertainty },
-    { key: 'regret', label: 'Pişmanlık', value: scores.regret },
-    { key: 'agency', label: 'İrade / Kontrol', value: scores.agency },
-    { key: 'energy', label: 'Enerji', value: scores.energy },
-    { key: 'attachment', label: 'Bağlanma', value: scores.attachment },
+    { key: 'abandonment' as Schema, label: 'Terk Edilme', value: dna.schemas.abandonment },
+    { key: 'defectiveness' as Schema, label: 'Yetersizlik', value: dna.schemas.defectiveness },
+    { key: 'subjugation' as Schema, label: 'Boyun Eğme', value: dna.schemas.subjugation },
+    { key: 'unrelenting' as Schema, label: 'Yüksek Standartlar', value: dna.schemas.unrelenting },
+    { key: 'deprivation' as Schema, label: 'Duygusal Yoksunluk', value: dna.schemas.deprivation },
+    { key: 'avoidance' as Schema, label: 'Kaçınma', value: dna.schemas.avoidance },
   ] as const;
 
   const ai = aiResult;

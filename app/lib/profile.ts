@@ -3,9 +3,6 @@
 // Tüm toplanan bilgiler burada birleşir
 // ───────────────────────────────────────────────
 
-export type CoreDimension = 'risk' | 'uncertainty' | 'regret' | 'agency' | 'energy' | 'attachment';
-export type ShadowSignal = 'perfectionism' | 'approval' | 'abandonment' | 'control' | 'avoidance' | 'innerCritic';
-
 export type PiriProfile = {
   // Demografik
   gender: 'female' | 'male' | null;
@@ -20,8 +17,8 @@ export type PiriProfile = {
   sub: string | null;
 
   // DNA skorları
-  scores: Record<CoreDimension, number> | null;
-  shadow: Record<ShadowSignal, number> | null;
+  scores: Record<string, number> | null;
+  shadow: Record<string, number> | null;
 
   // Katman 3 açık uçlu cevaplar
   textAnswers: string[];
@@ -146,27 +143,18 @@ export function profileToPromptContext(profile: PiriProfile): string {
   }
 
   if (profile.scores) {
-    const coreLabels: Record<CoreDimension, string> = {
-      risk: 'Risk algısı', uncertainty: 'Belirsizlik', regret: 'Pişmanlık',
-      agency: 'İrade', energy: 'Enerji', attachment: 'Bağlanma',
+    const schemaLabels: Record<string, string> = {
+      abandonment: 'Terk Edilme', defectiveness: 'Yetersizlik', subjugation: 'Boyun Eğme',
+      unrelenting: 'Yüksek Standartlar', deprivation: 'Duygusal Yoksunluk', avoidance: 'Kaçınma',
     };
     const scoreLine = Object.entries(profile.scores)
-      .map(([k, v]) => `${coreLabels[k as CoreDimension]}: ${v}/100`)
+      .map(([k, v]) => `${schemaLabels[k] || k}: ${v}/100`)
       .join(', ');
-    parts.push(`DNA Skorları: ${scoreLine}`);
+    parts.push(`DNA Şemaları: ${scoreLine}`);
   }
 
   if (profile.shadow) {
-    const shadowLabels: Record<ShadowSignal, string> = {
-      perfectionism: 'Mükemmeliyet', approval: 'Onay ihtiyacı', abandonment: 'Terk edilme',
-      control: 'Kontrol', avoidance: 'Kaçınma', innerCritic: 'İçsel eleştirmen',
-    };
-    const topShadow = Object.entries(profile.shadow)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
-      .map(([k, v]) => `${shadowLabels[k as ShadowSignal]}: ${v}/100`)
-      .join(', ');
-    parts.push(`Baskın blokajlar: ${topShadow}`);
+    parts.push(`Profil Tipi: ${Object.values(profile.shadow)[0] || 'Bilinmiyor'}`);
   }
 
   if (profile.textAnswers.length > 0) {

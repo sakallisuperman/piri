@@ -3,11 +3,13 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  getQuestionsForMode,
-  CHOICE_5,
+  getQuestions,
+  CHOICE_6,
   type Mode,
   type Question,
 } from '../questions';
+
+export const dynamic = 'force-dynamic';
 
 type AnswerMap = Record<string, number | string>;
 
@@ -35,7 +37,14 @@ function DnaTestInner() {
     ? localStorage.getItem('piri_mode')
     : null) as Mode | null) ?? 'work';
 
-  const questions = useMemo(() => getQuestionsForMode(mode), [mode]);
+  const questions = useMemo(() => {
+    if (typeof window === 'undefined') return [];
+    return [
+      ...getQuestions(mode, 1),
+      ...getQuestions(mode, 2),
+      ...getQuestions(mode, 3),
+    ];
+  }, [mode]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerMap>(() => {
@@ -66,7 +75,7 @@ function DnaTestInner() {
     const isSignedUp = localStorage.getItem('piri_signed_up') === 'true';
 
     if (layerParam === '2' && isSignedUp) {
-      const qs = getQuestionsForMode(mode);
+      const qs = getQuestions(mode, 2);
       const idx = qs.findIndex(q => q.layer === 2);
       if (idx >= 0) {
         setCurrentIndex(idx);
@@ -222,7 +231,7 @@ function DnaTestInner() {
             <div className="mt-8">
               {/* 5-button agree/disagree row */}
               <div className="flex items-stretch gap-2">
-                {CHOICE_5.map((label, index) => {
+                {CHOICE_6.map((label, index) => {
                   const c = AGREE_COLORS[index];
                   const isSelected = selected === index;
                   return (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { dnaToPromptContext } from "../../dna/questions";
 
 type ChatRequest = {
   message: string;
@@ -51,13 +52,19 @@ export async function POST(req: NextRequest) {
     };
 
     const profileContext = (() => {
-      if (!profile) return "";
-      const topScores = buildTop(profile.scores as Record<string, number | undefined> | undefined);
-      const topShadow = buildTop(profile.shadow as Record<string, number | undefined> | undefined);
-      if (topScores.length === 0 && topShadow.length === 0) return "";
-      const scorePart = topScores.length > 0 ? `En yuksek boyutlar: ${topScores.join(', ')}.` : '';
-      const shadowPart = topShadow.length > 0 ? `En belirgin golge sinyaller: ${topShadow.join(', ')}.` : '';
-      return `Kullanici profili: ${[scorePart, shadowPart].filter(Boolean).join(' ')}.`.trim();
+      if (!profile?.scores) return "";
+      // profile.scores'dan top 3 schema al
+      const topSchemas = Object.entries(profile.scores)
+        .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
+        .slice(0, 3)
+        .map(([key]) => key);
+      // dnaToPromptContext ile context üret (PiriDNA objesi oluştur)
+      const mockDna: any = {
+        schemas: profile.scores,
+        profile: 'schema_driven',
+        dominantSchema: topSchemas[0] as any,
+      };
+      return dnaToPromptContext(mockDna, profile.textAnswers || []);
     })();
 
     const systemPrompt = `Sen Piri'sin.
