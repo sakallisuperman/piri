@@ -217,13 +217,13 @@ Piri: "En zor olan ne şu an, tek bir şey?"`;
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+          const lines = chunk.split("\n").filter(l => l.trim());
           for (const line of lines) {
-            const data = line.replace("data: ", "").trim();
-            if (!data) continue;
+            const data = line.replace(/^data:\s*/, "").trim();
+            if (!data || data === "[DONE]") continue;
             try {
               const parsed = JSON.parse(data);
-              const token = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              const token = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
               if (token) controller.enqueue(encoder.encode(token));
             } catch {}
           }
