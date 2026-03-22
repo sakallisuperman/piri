@@ -61,8 +61,11 @@ export async function POST(req: NextRequest) {
       // dnaToPromptContext ile context üret (PiriDNA objesi oluştur)
       const mockDna: any = {
         schemas: profile.scores,
+        schemaScore: 0,
+        personaScore: 0,
+        shadowScore: 0,
+        dominant: topSchemas[0] as any,
         profile: 'schema_driven',
-        dominantSchema: topSchemas[0] as any,
       };
       return dnaToPromptContext(mockDna, profile.textAnswers || []);
     })();
@@ -113,15 +116,19 @@ GÖZLEM VE ÇÖZÜM:
 
 PROFİL BAZLI YAKLAŞIM (kullanıcı bilmez, sen bilirsin):
 ${profileContext ? `
-${profile?.scores?.uncertainty && profile.scores.uncertainty > 70 ? "- Belirsizlik toleransı düşük: muğlak sorularla boğma, net seçenekler sun." : ""}
-${profile?.scores?.regret && profile.scores.regret > 65 ? "- Pişmanlık korkusu yüksek: 'yanlış yaparım' döngüsünü kır, şimdiye getir." : ""}
-${profile?.scores?.regret && profile.scores.regret < 35 ? "- Pişmanlık korkusu düşük: cesur adımları destekle." : ""}
-${profile?.shadow?.abandonment && profile.shadow.abandonment > 60 ? "- Terk edilme hassasiyeti var: sabit ve güvenli dur, ani değişim önerme." : ""}
-${profile?.shadow?.perfectionism && profile.shadow.perfectionism > 65 ? "- Mükemmeliyetçi baskı var: 'doğru karar diye bir şey yok' hissini ver." : ""}
-${profile?.shadow?.approval && profile.shadow.approval > 60 ? "- Onay arıyor: dışarıdan değil içeriden cevap aramasını sağla." : ""}
-${profile?.scores?.agency && profile.scores.agency < 35 ? "- Kontrol hissi düşük: küçük somut adımlar öner, irade hissi ver." : ""}
-${profile?.scores?.energy && profile.scores.energy < 40 ? "- Enerji düşük: ağır sorular sorma, hafif tut." : ""}
-${profile?.scores?.attachment && profile.scores.attachment > 70 ? "- Bağlanma yüksek: ilişki kararlarında kopuş değil dönüşüm dili kullan." : ""}
+[KULLANICI PROFİLİ — BUNU KULLANICIYA SÖYLEME]
+
+Dominant şemalar:
+${profile?.scores?.abandonment > 60 ? "- Terk edilme şeması aktif: güvenli ve sabit dur, ani değişim önerme, yalnız bırakma hissi verme." : ""}
+${profile?.scores?.defectiveness > 60 ? "- Yetersizlik şeması aktif: 'yetmezsin' döngüsünü kır, küçük kazanımları göster." : ""}
+${profile?.scores?.subjugation > 60 ? "- Boyun eğme şeması aktif: kendi sesini bulmasına yardım et, başkalarının beklentisinden ayır." : ""}
+${profile?.scores?.unrelenting > 60 ? "- Yüksek standartlar aktif: mükemmel karar diye bir şey yok hissini ver, hareketi kolaylaştır." : ""}
+${profile?.scores?.deprivation > 60 ? "- Duygusal yoksunluk aktif: ihtiyaçlarını ifade etmesine alan aç, yük olmadığını hissettir." : ""}
+${profile?.scores?.avoidance > 60 ? "- Kaçınma şeması aktif: ertelemenin bedelini göster, küçük somut adım öner." : ""}
+
+Kullanıcının kendi sözleri (bunları aktif kullan, üzerine sor):
+${profile?.textAnswers?.slice(0,6).map((t, i) => `${i+1}. "${t}"`).join('\n')}
+
 Karar alanı: ${mode}
 ` : `Karar alanı: ${mode}`}
 
