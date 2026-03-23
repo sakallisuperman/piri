@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const history = body?.history ?? [];
     const mode = body?.mode ?? "general";
     const profile = body?.profile ?? null;
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json({ error: "API key not configured" }, { status: 500 });
@@ -176,34 +176,33 @@ Piri: "Sen ne anlaşılmak istiyorsun?"
 Kullanıcı: "Her şey çok zor."
 Piri: "En zor olan ne şu an, tek bir şey?"`;
 
-    const contents = [
+    const messages = [
+      { role: "system", content: systemPrompt },
       ...history.map((h) => ({
-        parts: [{ text: h.content || h.text || "" }],
-        role: h.role === "assistant" ? "model" : "user",
+        role: h.role === "assistant" ? "assistant" : "user",
+        content: h.content || h.text || "",
       })),
-      { parts: [{ text: message }], role: "user" },
+      { role: "user", content: message },
     ];
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?key=${apiKey}`, {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey,
       },
       body: JSON.stringify({
-        contents,
-        systemInstruction: {
-          parts: [{ text: systemPrompt }]
-        },
-        generationConfig: {
-          temperature: 0.65,
-          maxOutputTokens: 180,
-        },
+        model: "llama-3.3-70b-versatile",
+        messages,
+        temperature: 0.65,
+        max_tokens: 180,
+        stream: true,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("Gemini error:", errText);
+      console.error("Groq error:", errText);
       return NextResponse.json({ error: "AI service error" }, { status: 502 });
     }
 
@@ -217,15 +216,13 @@ Piri: "En zor olan ne şu an, tek bir şey?"`;
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(l => l.trim());
+          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
           for (const line of lines) {
-            const data = line.replace(/^data:\s*/, "").trim();
-            if (!data || data === "[DONE]") continue;
-            try {
-              const parsed = JSON.parse(data);
-              const token = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (token) controller.enqueue(encoder.encode(token));
-            } catch {}
+            const data = line.replace("data: ", "").trim();
+            if (data === "[DONE]") { controller.close(); return; }
+            const parsed = JSON.parse(data);
+            const token = parsed.choices?.[0]?.delta?.content;
+            if (token) controller.enqueue(encoder.encode(token));
           }
         }
         controller.close();
