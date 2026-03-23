@@ -304,7 +304,7 @@ export default function Home() {
   return (
     <main className="min-h-screen w-full overflow-hidden relative select-none">
       {/* Light background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
 
       {/* Dark overlay — clean fade */}
       <div

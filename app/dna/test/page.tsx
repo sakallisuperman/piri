@@ -168,7 +168,7 @@ function DnaTestInner() {
   if (transition.visible) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+        <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
 
         <div className="relative w-full max-w-lg text-center space-y-8">
           <div className="flex justify-center">
@@ -200,7 +200,7 @@ function DnaTestInner() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
 
       <div className={`relative w-full max-w-2xl space-y-8 transition-all duration-200 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
         {/* Progress */}
@@ -303,7 +303,7 @@ export default function DnaTestPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+        <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
         <div className="relative text-slate-500">Yükleniyor...</div>
       </main>
     }>

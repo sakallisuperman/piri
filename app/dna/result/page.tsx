@@ -343,7 +343,7 @@ export default function DnaResultPage() {
   if (!dna) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+        <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
         <div className="relative text-slate-700">Sonuç bulunamadı. Önce testi çöz.</div>
       </main>
     );
@@ -367,7 +367,7 @@ export default function DnaResultPage() {
 
   return (
     <main className="min-h-screen flex items-start justify-center p-6">
-      <div className="fixed inset-0 bg-gradient-to-b from-[#f5faff] via-[#edf6ff] to-[#f5fbff]" />
+      <div className="fixed inset-0 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]" />
 
       <div className="relative w-full max-w-2xl space-y-8 py-10">
 
