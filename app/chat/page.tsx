@@ -91,7 +91,7 @@ function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b [#0d0d1a]">
       <div className="w-full max-w-md space-y-8">
         {/* Piri Orb */}
         <div className="flex justify-center">
@@ -401,7 +401,7 @@ await saveConversation("user123", "user", message);
   // Auth kontrolü
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b [#0d0d1a]">
         <PiriOrb size={60} />
       </div>
     );
@@ -412,7 +412,7 @@ await saveConversation("user123", "user", message);
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-gradient-to-b from-[#f8f4ee] via-[#f2ece4] to-[#f8f4ee]">
+    <div className="h-screen flex overflow-hidden bg-gradient-to-b [#0d0d1a]">
       {/* Sidebar overlay (mobile) */}
       {sidebarOpen && (
         <div
